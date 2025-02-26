@@ -13,13 +13,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CommentDTO {
+public class GameObjectDTO {
 
     private Long id;
-    private String message;
-    private Long authorId;
+    private String title;
+    private String text;
     private LocalDateTime createdAt;
-    private boolean approved;
-    private GameObjectDTO gameObject;
-
+    private LocalDateTime updatedAt;
+    private UserDTO user;
 }

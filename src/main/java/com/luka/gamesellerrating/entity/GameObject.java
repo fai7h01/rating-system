@@ -16,15 +16,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "comments")
+@Table(name = "game_objects")
 @SQLRestriction("is_deleted = false")
-public class Comment extends BaseEntity{
+public class GameObject extends BaseEntity{
 
-    private String message;
-    private Long authorId;
+    private String title;
+    private String text;
     private LocalDateTime createdAt;
-    private boolean approved;
+    private LocalDateTime updatedAt;
     @ManyToOne
-    private GameObject gameObject;
-
+    private User user;
 }
