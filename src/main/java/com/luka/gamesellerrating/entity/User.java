@@ -1,7 +1,10 @@
 package com.luka.gamesellerrating.entity;
 
 import com.luka.gamesellerrating.enums.Role;
+import com.luka.gamesellerrating.enums.UserStatus;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +26,9 @@ public class User extends BaseEntity{
     private String email;
     private String password;
     private String confirmPassword;
+    @Enumerated(EnumType.STRING)
     private Role role;
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
 
 }
