@@ -1,9 +1,6 @@
 package com.luka.gamesellerrating.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,11 +19,13 @@ import java.time.LocalDateTime;
 public class Comment extends BaseEntity{
 
     private String message;
-    private Long authorId;
     private LocalDateTime createdAt;
     private boolean approved;
     @ManyToOne
-    @JoinColumn(name = "game_object_id")
+    @JoinColumn(name = "author_user_id", nullable = false)
+    private User author;
+    @ManyToOne
+    @JoinColumn(name = "game_object_id", nullable = false)
     private GameObject gameObject;
 
 }

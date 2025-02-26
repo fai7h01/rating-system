@@ -6,20 +6,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CommentDTO {
+public class RatingDTO {
 
     private Long id;
-    private String message;
-    private LocalDateTime createdAt;
-    private boolean approved;
-    private UserDTO author;
-    private GameObjectDTO gameObject;
+    private Integer value;
+    private UserDTO user;
+    private CommentDTO comment;
 
 }
