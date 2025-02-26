@@ -5,7 +5,10 @@ import lombok.Getter;
 @Getter
 public enum UserStatus {
 
-    PENDING("Pending"), VERIFIED("Verified"), REJECTED("Rejected");
+    PENDING("Pending"),
+    VERIFIED("Verified"),
+    REJECTED("Rejected"),
+    SUSPENDED("Suspended");
 
     private final String value;
 
