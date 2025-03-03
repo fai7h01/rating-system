@@ -23,8 +23,6 @@ public class GameObject extends BaseEntity{
 
     private String title;
     private String text;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
