@@ -15,6 +15,8 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.core.Response;
@@ -73,8 +75,16 @@ public class KeycloakServiceImpl implements KeycloakService {
     @Override
     public UserDTO getLoggedInUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SimpleKeycloakAccount userDetails = (SimpleKeycloakAccount) authentication.getDetails();
-        return userService.findByUsername(userDetails.getKeycloakSecurityContext().getToken().getPreferredUsername());
+
+        if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+            Jwt jwt = jwtAuth.getToken();
+            String username = jwt.getClaimAsString("preferred_username");
+            if (username != null) {
+                return userService.findByUsername(username);
+            }
+        }
+
+        throw new IllegalStateException("No authenticated user found");
     }
 
     private UserRepresentation getUserRepresentation(UserDTO dto) {
@@ -87,7 +97,7 @@ public class KeycloakServiceImpl implements KeycloakService {
         keycloakUser.setUsername(dto.getUsername());
         keycloakUser.setFirstName(dto.getFirstName());
         keycloakUser.setLastName(dto.getLastName());
-        keycloakUser.setEmail(dto.getUsername());
+        keycloakUser.setEmail(dto.getEmail());
         keycloakUser.setCredentials(List.of(credential));
         keycloakUser.setEmailVerified(false);
         keycloakUser.setEnabled(true);
