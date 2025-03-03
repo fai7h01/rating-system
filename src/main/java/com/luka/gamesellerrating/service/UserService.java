@@ -5,5 +5,5 @@ import com.luka.gamesellerrating.dto.UserDTO;
 public interface UserService {
 
     UserDTO save(UserDTO user);
-    UserDTO findByUsername(String username);
+    UserDTO findById(Long id);
 }

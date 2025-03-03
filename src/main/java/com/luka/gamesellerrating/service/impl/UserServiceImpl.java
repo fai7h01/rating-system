@@ -3,6 +3,7 @@ package com.luka.gamesellerrating.service.impl;
 import com.luka.gamesellerrating.dto.UserDTO;
 import com.luka.gamesellerrating.entity.User;
 import com.luka.gamesellerrating.exception.UserAlreadyExistsException;
+import com.luka.gamesellerrating.exception.UserNotFoundException;
 import com.luka.gamesellerrating.repository.UserRepository;
 import com.luka.gamesellerrating.service.UserService;
 import com.luka.gamesellerrating.util.MapperUtil;
@@ -35,9 +36,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO findByUsername(String username) {
-        return null;
+    public UserDTO findById(Long id) {
+        User foundUser = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found."));
+        return mapperUtil.convert(foundUser, new UserDTO());
     }
-
 
 }
