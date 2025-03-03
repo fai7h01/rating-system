@@ -41,4 +41,10 @@ public class UserServiceImpl implements UserService {
         return mapperUtil.convert(foundUser, new UserDTO());
     }
 
+    @Override
+    public UserDTO findByUsername(String username) {
+        User foundUser = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new UserNotFoundException("User not found."));
+        return mapperUtil.convert(foundUser, new UserDTO());
+    }
+
 }
