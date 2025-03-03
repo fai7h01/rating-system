@@ -1,6 +1,7 @@
 package com.luka.gamesellerrating.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.luka.gamesellerrating.enums.RatingValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,8 +15,9 @@ import lombok.Setter;
 public class RatingDTO {
 
     private Long id;
-    private Integer value;
-    private UserDTO user;
+    private RatingValue value;
+    private boolean approved;
+    private UserDTO author;
     private CommentDTO comment;
-
+    private GameObjectDTO gameObject;
 }

@@ -1,9 +1,7 @@
 package com.luka.gamesellerrating.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import com.luka.gamesellerrating.enums.RatingValue;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,11 +17,15 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction("is_deleted = false")
 public class Rating extends BaseEntity{
 
-    private Integer value;
+    @Enumerated(EnumType.STRING)
+    private RatingValue value;
+    private boolean approved;
     @OneToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private User author;
     @OneToOne
     @JoinColumn(name = "comment_id")
     private Comment comment;
+    @ManyToOne
+    private GameObject gameObject;
 }

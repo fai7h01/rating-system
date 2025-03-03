@@ -17,9 +17,4 @@ public class CommentDTO {
 
     private Long id;
     private String message;
-    private LocalDateTime createdAt;
-    private boolean approved;
-    private UserDTO author;
-    private GameObjectDTO gameObject;
-
 }

@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,13 +17,4 @@ import java.time.LocalDateTime;
 public class Comment extends BaseEntity{
 
     private String message;
-    private LocalDateTime createdAt;
-    private boolean approved;
-    @ManyToOne
-    @JoinColumn(name = "author_user_id", nullable = false)
-    private User author;
-    @ManyToOne
-    @JoinColumn(name = "game_object_id", nullable = false)
-    private GameObject gameObject;
-
 }
