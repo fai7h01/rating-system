@@ -40,9 +40,12 @@ public class GameObjectServiceImpl implements GameObjectService {
 
     @Override
     public GameObjectDTO update(Long id, GameObjectDTO gameObject) {
-
-
-        return null;
+        if (!gameObjectRepository.existsById(id)) {
+            throw new GameObjectNotFoundException("Game obj not found.");
+        }
+        gameObject.setId(id);
+        GameObject savedObj = gameObjectRepository.save(mapperUtil.convert(gameObject, new GameObject()));
+        return mapperUtil.convert(savedObj, new GameObjectDTO());
     }
 
     @Override
