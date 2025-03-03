@@ -23,9 +23,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO save(UserDTO user) {
-        Optional<User> foundUser = userRepository.findByEmailIgnoreCase(user.getEmail());
-        if (foundUser.isPresent()) {
-            throw new UserAlreadyExistsException("User already exists.");
+        if (userRepository.existsByEmailIgnoreCase(user.getEmail())) {
+            throw new UserAlreadyExistsException("Email already in use.");
+        }
+        if (userRepository.existsByUsernameIgnoreCase(user.getUsername())) {
+            throw new UserAlreadyExistsException("Username already taken.");
         }
         var userEntity = mapperUtil.convert(user, new User());
         var savedEntity = userRepository.save(userEntity);
@@ -33,22 +35,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delete(Long id) {
-
+    public UserDTO findByUsername(String username) {
+        return null;
     }
 
-    @Override
-    public void verifyUser(Long id) {
 
-    }
-
-    @Override
-    public void rejectUser(Long id) {
-
-    }
-
-    @Override
-    public void suspendUser(Long id) {
-
-    }
 }
