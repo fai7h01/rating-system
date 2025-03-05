@@ -66,7 +66,7 @@ public class KeycloakServiceImpl implements KeycloakService {
             }
 
         } catch (Exception e) {
-            log.error("Exception in keycloak service user create: {}", e.getMessage());
+            log.error("User creation failed in keycloak: {}", e.getMessage());
         } finally {
             keycloak.close();
         }
