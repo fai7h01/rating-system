@@ -1,6 +1,7 @@
 package com.luka.gamesellerrating.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,10 +13,12 @@ import org.hibernate.annotations.SQLRestriction;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "comments")
+@Table(name = "anonymous_users")
 @SQLRestriction("is_deleted = false")
-public class Comment extends BaseEntity{
+public class AnonymousUser extends BaseEntity{
 
-    private String message;
-    private String sentimentAnalysis;
+    private String username;
+    private String sessionId;
+    private String ipAddress;
+
 }

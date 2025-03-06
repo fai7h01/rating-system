@@ -14,6 +14,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -85,6 +86,23 @@ public class KeycloakServiceImpl implements KeycloakService {
         }
 
         throw new IllegalStateException("No authenticated user found");
+    }
+
+    @Override
+    public boolean isUserAnonymous() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return true;
+        }
+
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            if ("ROLE_ANONYMOUS".equals(authority.getAuthority())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private UserRepresentation getUserRepresentation(UserDTO dto) {

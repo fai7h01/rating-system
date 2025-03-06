@@ -18,14 +18,25 @@ import org.hibernate.annotations.SQLRestriction;
 public class Rating extends BaseEntity{
 
     @Enumerated(EnumType.STRING)
-    private RatingValue value;
+    private RatingValue rating;
+
+    @Column(name = "approved")
     private boolean approved;
-    @OneToOne
-    @JoinColumn(name = "user_id")
+
+    @ManyToOne
+    @JoinColumn(name = "author_id")
     private User author;
-    @OneToOne
+
+    @ManyToOne
+    @JoinColumn(name = "anonymous_author_id")
+    private AnonymousUser anonymousUser;
+
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "comment_id")
     private Comment comment;
+
     @ManyToOne
+    @JoinColumn(name = "game_object_id", nullable = false)
     private GameObject gameObject;
+
 }
