@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.http.ResponseEntity.ok;
+import static org.springframework.http.ResponseEntity.*;
 
 @RestController
 @RequestMapping("/api/game-objects")
@@ -19,7 +19,6 @@ public class GameObjectController {
     public GameObjectController(GameObjectService gameObjectService) {
         this.gameObjectService = gameObjectService;
     }
-
 
     @GetMapping
     public ResponseEntity<ResponseWrapper> listAll() {
@@ -33,5 +32,10 @@ public class GameObjectController {
         return ok(ResponseWrapper.builder().data(saved).build());
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseWrapper> deleteGameObj(@PathVariable("id") Long id) {
+        gameObjectService.delete(id);
+        return noContent().build();
+    }
 
 }
