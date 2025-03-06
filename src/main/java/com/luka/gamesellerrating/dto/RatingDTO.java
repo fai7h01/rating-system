@@ -19,7 +19,6 @@ public class RatingDTO {
     private boolean approved;
     private UserDTO author;
     private AnonymousUserDTO anonymousAuthor;
-    private String ipAddress;
     private CommentDTO comment;
     private GameObjectDTO gameObject;
 }

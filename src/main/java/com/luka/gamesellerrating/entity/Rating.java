@@ -29,7 +29,7 @@ public class Rating extends BaseEntity{
 
     @ManyToOne
     @JoinColumn(name = "anonymous_author_id")
-    private AnonymousUser anonymousUser;
+    private AnonymousUser anonymousAuthor;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "comment_id")
