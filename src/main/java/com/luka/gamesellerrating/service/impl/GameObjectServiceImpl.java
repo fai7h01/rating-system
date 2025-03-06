@@ -31,8 +31,7 @@ public class GameObjectServiceImpl implements GameObjectService {
         if (gameObjectRepository.existsByTitle(gameObject.getTitle())) {
             throw new GameObjectAlreadyExistsException("Game obj already exists with that title.");
         }
-        UserDTO loggedInUser = keycloakService.getLoggedInUser();
-        gameObject.setUser(loggedInUser);
+        gameObject.setUser(getLoggedInUser());
         GameObject entity = mapperUtil.convert(gameObject, new GameObject());
         GameObject saved = gameObjectRepository.save(entity);
         return mapperUtil.convert(saved, new GameObjectDTO());
@@ -50,11 +49,21 @@ public class GameObjectServiceImpl implements GameObjectService {
 
     @Override
     public List<GameObjectDTO> findAll() {
-        return List.of();
+        return gameObjectRepository.findAll()
+                .stream()
+                .map(gameObject -> mapperUtil.convert(gameObject, new GameObjectDTO()))
+                .toList();
     }
 
     @Override
     public void delete(Long id) {
+        GameObject foundGameObj = gameObjectRepository.findById(id)
+                .orElseThrow(() -> new GameObjectNotFoundException("Game obj not found."));
+        foundGameObj.setIsDeleted(true);
+        gameObjectRepository.save(foundGameObj);
+    }
 
+    private UserDTO getLoggedInUser() {
+        return keycloakService.getLoggedInUser();
     }
 }
