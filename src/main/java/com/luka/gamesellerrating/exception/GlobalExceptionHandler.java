@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
-    @ExceptionHandler({UserAlreadyExistsException.class})
+    @ExceptionHandler({UserAlreadyExistsException.class, AnonymousUserAlreadyExistsException.class})
     public ResponseEntity<ExceptionWrapper> handleConflictExceptions(Throwable exception) {
         log.error(exception.getMessage());
         return status(HttpStatus.CONFLICT)
