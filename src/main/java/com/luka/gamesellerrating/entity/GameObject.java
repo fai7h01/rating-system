@@ -24,6 +24,6 @@ public class GameObject extends BaseEntity{
     private String title;
     private String text;
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "seller_id")
+    private User seller;
 }

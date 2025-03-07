@@ -24,5 +24,5 @@ public class GameObjectDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @JsonProperty(access = READ_ONLY)
-    private UserDTO user;
+    private UserDTO seller;
 }
