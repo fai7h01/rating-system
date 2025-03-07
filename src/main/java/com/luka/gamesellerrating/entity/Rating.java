@@ -14,8 +14,10 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @Entity
 @Table(name = "ratings")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "rating_type", discriminatorType = DiscriminatorType.STRING)
 @SQLRestriction("is_deleted = false")
-public class Rating extends BaseEntity{
+public abstract class Rating extends BaseEntity{
 
     @Enumerated(EnumType.STRING)
     private RatingValue rating;
@@ -23,16 +25,8 @@ public class Rating extends BaseEntity{
     @Column(name = "approved")
     private boolean approved;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id")
-    private User author;
-
-    @ManyToOne
-    @JoinColumn(name = "anonymous_author_id")
-    private AnonymousUser anonymousAuthor;
-
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "comment_id")
+    @JoinColumn(name = "comment_id", nullable = false)
     private Comment comment;
 
     @ManyToOne
