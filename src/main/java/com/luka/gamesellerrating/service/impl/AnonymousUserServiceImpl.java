@@ -23,10 +23,11 @@ public class AnonymousUserServiceImpl implements AnonymousUserService {
     @Override
     public AnonymousUserDTO save(String sessionId, String ipAddress) {
         if (!anonymousUserRepository.existsByIpAddressAndSessionId(ipAddress, sessionId)){
-            AnonymousUser anonymousUser = new AnonymousUser();
+            var anonymousUser = new AnonymousUser();
             anonymousUser.setSessionId(sessionId);
             anonymousUser.setIpAddress(ipAddress);
-            return mapperUtil.convert(anonymousUser, new AnonymousUserDTO());
+            var savedAnonymousUser = anonymousUserRepository.save(anonymousUser);
+            return mapperUtil.convert(savedAnonymousUser, new AnonymousUserDTO());
         }
         throw new AnonymousUserAlreadyExistsException("Anonymous user already exists.");
     }
