@@ -6,6 +6,7 @@ import com.luka.gamesellerrating.entity.AnonymousRating;
 import com.luka.gamesellerrating.entity.AuthorizedRating;
 import com.luka.gamesellerrating.entity.Rating;
 import com.luka.gamesellerrating.exception.RatingAlreadyExistsException;
+import com.luka.gamesellerrating.exception.RatingNotFoundException;
 import com.luka.gamesellerrating.repository.RatingRepository;
 import com.luka.gamesellerrating.service.AnonymousUserService;
 import com.luka.gamesellerrating.service.KeycloakService;
@@ -53,6 +54,13 @@ public class RatingServiceImpl implements RatingService {
                 .stream()
                 .map(rating -> mapperUtil.convert(rating, new RatingDTO()))
                 .toList();
+    }
+
+    @Override
+    public RatingDTO findRatingBySeller(Long sellerId, Long ratingId) {
+        var foundRating = ratingRepository.findBySellerIdAndId(sellerId, ratingId)
+                .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
+        return mapperUtil.convert(foundRating, new RatingDTO());
     }
 
     private RatingDTO saveAnonymous(RatingDTO rating, String sessionId, String ipAddress) {

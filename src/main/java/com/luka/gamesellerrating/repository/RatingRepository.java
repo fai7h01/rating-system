@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RatingRepository extends JpaRepository<Rating, Long> {
 
@@ -24,4 +25,6 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     boolean existsAnonymousRating(@Param("sellerId") Long sellerId,
                                   @Param("sessionId") String sessionId,
                                   @Param("ipAddress") String ipAddress);
+
+    Optional<Rating> findBySellerIdAndId(Long sellerId, Long ratingId);
 }

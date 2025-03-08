@@ -4,8 +4,13 @@ import com.luka.gamesellerrating.dto.RatingDTO;
 import com.luka.gamesellerrating.dto.wrapper.ResponseWrapper;
 import com.luka.gamesellerrating.service.RatingService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 @RequestMapping("/sellers/{sellerId}/ratings")
@@ -22,13 +27,34 @@ public class RatingController {
                                                         @RequestBody RatingDTO rating,
                                                         HttpServletRequest request) {
         RatingDTO savedRating = ratingService.save(sellerId, rating, request.getSession().getId(), request.getRemoteAddr());
-        return ResponseEntity.ok(ResponseWrapper.builder()
+        return ok(ResponseWrapper.builder()
+                .success(true)
+                .code(HttpStatus.OK.value())
+                .message("Rating submitted successfully.")
                 .data(savedRating)
-                .message("Rating submitted successfully.").build());
+                .build());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseWrapper> findAllBySeller(@PathVariable Long id) {
-        return ResponseEntity.ok(ResponseWrapper.builder().data(ratingService.findAllBySeller(id)).build());
+    @GetMapping
+    public ResponseEntity<ResponseWrapper> getSellerRatings(@PathVariable("sellerId") Long sellerId) {
+        List<RatingDTO> sellerRatings = ratingService.findAllBySeller(sellerId);
+        return ok(ResponseWrapper.builder()
+                .success(true)
+                .code(HttpStatus.OK.value())
+                .message("Ratings retrieved successfully.")
+                .data(sellerRatings)
+                .build());
+    }
+
+    @GetMapping("/{ratingId}")
+    public ResponseEntity<ResponseWrapper> getRating(@PathVariable("sellerId") Long sellerId,
+                                                     @PathVariable("ratingId") Long ratingId) {
+        RatingDTO sellerRating = ratingService.findRatingBySeller(sellerId, ratingId);
+        return ok(ResponseWrapper.builder()
+                .success(true)
+                .code(HttpStatus.OK.value())
+                .message("Rating retrieved successfully.")
+                .data(sellerRating)
+                .build());
     }
 }

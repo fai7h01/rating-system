@@ -8,4 +8,5 @@ public interface RatingService {
 
     RatingDTO save(Long sellerId, RatingDTO rating, String sessionId, String ipAddress);
     List<RatingDTO> findAllBySeller(Long sellerId);
+    RatingDTO findRatingBySeller(Long sellerId, Long ratingId);
 }

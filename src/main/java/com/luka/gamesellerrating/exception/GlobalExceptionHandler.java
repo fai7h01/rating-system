@@ -27,7 +27,8 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
-    @ExceptionHandler({UserAlreadyExistsException.class, AnonymousUserAlreadyExistsException.class})
+    @ExceptionHandler({UserAlreadyExistsException.class, AnonymousUserAlreadyExistsException.class,
+            RatingAlreadyExistsException.class, GameObjectAlreadyExistsException.class})
     public ResponseEntity<ExceptionWrapper> handleConflictExceptions(Throwable exception) {
         log.error(exception.getMessage());
         return status(HttpStatus.CONFLICT)
@@ -39,7 +40,7 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
-    @ExceptionHandler({UserNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class, RatingNotFoundException.class, GameObjectNotFoundException.class})
     public ResponseEntity<ExceptionWrapper> handleNotFoundExceptions(Throwable exception) {
         log.error(exception.getMessage());
         return status(HttpStatus.NOT_FOUND)

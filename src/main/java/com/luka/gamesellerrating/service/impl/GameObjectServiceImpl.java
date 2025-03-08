@@ -31,7 +31,7 @@ public class GameObjectServiceImpl implements GameObjectService {
         if (gameObjectRepository.existsByTitle(gameObject.getTitle())) {
             throw new GameObjectAlreadyExistsException("Game obj already exists with that title.");
         }
-        gameObject.setUser(getLoggedInUser());
+        gameObject.setSeller(getLoggedInUser());
         GameObject entity = mapperUtil.convert(gameObject, new GameObject());
         GameObject saved = gameObjectRepository.save(entity);
         return mapperUtil.convert(saved, new GameObjectDTO());

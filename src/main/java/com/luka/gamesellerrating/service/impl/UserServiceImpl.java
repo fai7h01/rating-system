@@ -2,6 +2,7 @@ package com.luka.gamesellerrating.service.impl;
 
 import com.luka.gamesellerrating.dto.UserDTO;
 import com.luka.gamesellerrating.entity.User;
+import com.luka.gamesellerrating.enums.Role;
 import com.luka.gamesellerrating.exception.UserAlreadyExistsException;
 import com.luka.gamesellerrating.exception.UserNotFoundException;
 import com.luka.gamesellerrating.repository.UserRepository;
@@ -50,6 +51,13 @@ public class UserServiceImpl implements UserService {
     public UserDTO findByUsername(String username) {
         User foundUser = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new UserNotFoundException("User not found."));
         return mapperUtil.convert(foundUser, new UserDTO());
+    }
+
+    @Override
+    public UserDTO findSellerByUsername(String username) {
+        var foundSeller = userRepository.findByUsernameIgnoreCaseAndRole(username, Role.Seller)
+                .orElseThrow(() -> new UserNotFoundException("Seller not found."));
+        return mapperUtil.convert(foundSeller, new UserDTO());
     }
 
 }
