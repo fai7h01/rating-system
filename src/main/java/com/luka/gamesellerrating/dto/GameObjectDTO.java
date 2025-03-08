@@ -18,10 +18,13 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GameObjectDTO {
 
+    @JsonProperty(access = READ_ONLY)
     private Long id;
     private String title;
     private String text;
+    @JsonProperty(access = READ_ONLY)
     private LocalDateTime createdAt;
+    @JsonProperty(access = READ_ONLY)
     private LocalDateTime updatedAt;
     @JsonProperty(access = READ_ONLY)
     private UserDTO seller;
