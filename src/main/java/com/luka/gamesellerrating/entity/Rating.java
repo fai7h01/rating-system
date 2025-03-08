@@ -25,7 +25,7 @@ public abstract class Rating extends BaseEntity{
     @Column(name = "approved")
     private boolean approved;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "comment_id", nullable = false)
     private Comment comment;
 

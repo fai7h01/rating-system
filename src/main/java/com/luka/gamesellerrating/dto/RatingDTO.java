@@ -17,8 +17,8 @@ public class RatingDTO {
     private Long id;
     private RatingValue rating;
     private boolean approved;
-    private UserDTO author;
-    private AnonymousUserDTO anonymousAuthor;
     private CommentDTO comment;
+    private UserDTO author;
     private UserDTO seller;
+    private AnonymousUserDTO anonymousAuthor;
 }

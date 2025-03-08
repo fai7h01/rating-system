@@ -1,23 +1,24 @@
 package com.luka.gamesellerrating.service.impl;
 
 import com.luka.gamesellerrating.dto.AnonymousUserDTO;
+import com.luka.gamesellerrating.dto.CommentDTO;
 import com.luka.gamesellerrating.dto.RatingDTO;
 import com.luka.gamesellerrating.entity.AnonymousRating;
 import com.luka.gamesellerrating.entity.AuthorizedRating;
+import com.luka.gamesellerrating.entity.Comment;
 import com.luka.gamesellerrating.entity.Rating;
 import com.luka.gamesellerrating.exception.RatingAlreadyExistsException;
 import com.luka.gamesellerrating.exception.RatingNotFoundException;
+import com.luka.gamesellerrating.repository.CommentRepository;
 import com.luka.gamesellerrating.repository.RatingRepository;
-import com.luka.gamesellerrating.service.AnonymousUserService;
-import com.luka.gamesellerrating.service.KeycloakService;
-import com.luka.gamesellerrating.service.RatingService;
-import com.luka.gamesellerrating.service.UserService;
+import com.luka.gamesellerrating.service.*;
 import com.luka.gamesellerrating.util.MapperUtil;
-import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class RatingServiceImpl implements RatingService {
 
@@ -25,14 +26,16 @@ public class RatingServiceImpl implements RatingService {
     private final AnonymousUserService anonymousUserService;
     private final UserService userService;
     private final KeycloakService keycloakService;
+    private final CommentService commentService;
     private final MapperUtil mapperUtil;
 
     public RatingServiceImpl(RatingRepository ratingRepository, AnonymousUserService anonymousUserService, UserService userService,
-                             KeycloakService keycloakService, MapperUtil mapperUtil) {
+                             KeycloakService keycloakService, CommentService commentService, MapperUtil mapperUtil) {
         this.ratingRepository = ratingRepository;
         this.anonymousUserService = anonymousUserService;
         this.userService = userService;
         this.keycloakService = keycloakService;
+        this.commentService = commentService;
         this.mapperUtil = mapperUtil;
     }
 
@@ -46,8 +49,6 @@ public class RatingServiceImpl implements RatingService {
                 : saveAuthorized(rating);
     }
 
-
-    @Transactional
     @Override
     public List<RatingDTO> findAllBySeller(Long sellerId) {
         return ratingRepository.findAllBySellerId(sellerId)
@@ -80,6 +81,8 @@ public class RatingServiceImpl implements RatingService {
 
     private <T extends Rating> RatingDTO persistRating(RatingDTO rating, T ratingClass) {
         var ratingToSave = mapperUtil.convert(rating, ratingClass);
+        var savedComment = commentService.save(rating.getComment());
+        ratingToSave.setComment(mapperUtil.convert(savedComment, new Comment()));
         var savedRating = ratingRepository.save(ratingToSave);
         return mapperUtil.convert(savedRating, new RatingDTO());
     }

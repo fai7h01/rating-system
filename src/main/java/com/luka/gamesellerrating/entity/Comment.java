@@ -16,6 +16,7 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction("is_deleted = false")
 public class Comment extends BaseEntity{
 
+    @Column(nullable = false)
     private String message;
     private String sentimentAnalysis;
 }
