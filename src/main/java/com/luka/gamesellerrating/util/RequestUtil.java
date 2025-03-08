@@ -8,11 +8,34 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Component
 public class RequestUtil {
 
-    public String getSessionId() {
+    public String generateDeviceFingerprint() {
+        return String.join("-",
+                getSessionId(),
+                getClientIp(),
+                getUserAgent(),
+                getAcceptLanguage(),
+                getScreenResolution());
+    }
+
+    private String getSessionId() {
         return getCurrentRequest().getSession().getId();
     }
 
-    public String getClientIp() {
+    private String getUserAgent() {
+        return getCurrentRequest().getHeader("User-Agent");
+    }
+
+    private String getAcceptLanguage() {
+        return getCurrentRequest().getHeader("Accept-Language");
+    }
+
+    private String getScreenResolution() {
+        String height = getCurrentRequest().getHeader("Sec-CH-Viewport-Height");
+        String width = getCurrentRequest().getHeader("Sec-CH-Viewport-Width");
+        return height + "x" + width;
+    }
+
+    private String getClientIp() {
         HttpServletRequest request = getCurrentRequest();
         String ipAddress = request.getHeader("X-Forwarded-For");
         if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {

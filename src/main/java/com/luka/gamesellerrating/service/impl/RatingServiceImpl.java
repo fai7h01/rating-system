@@ -66,7 +66,7 @@ public class RatingServiceImpl implements RatingService {
     }
 
     private RatingDTO saveAnonymous(RatingDTO rating, RequestUtil requestUtil) {
-        var identifier = requestUtil.getSessionId().concat("-").concat(requestUtil.getClientIp());
+        var identifier = requestUtil.generateDeviceFingerprint();
         checkDuplicateAnonymousRating(rating.getSeller().getId(),identifier);
         var anonymousUser = getOrCreateAnonymousUser(identifier);
         rating.setAnonymousAuthor(anonymousUser);
