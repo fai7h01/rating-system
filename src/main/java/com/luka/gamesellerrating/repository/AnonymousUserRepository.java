@@ -3,8 +3,9 @@ package com.luka.gamesellerrating.repository;
 import com.luka.gamesellerrating.entity.AnonymousUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface AnonymousUserRepository extends JpaRepository<AnonymousUser, Long> {
 
-    boolean existsByIpAddressAndSessionId(String ip, String sessionId);
-
+    Optional<AnonymousUser> findBySessionIdAndIpAddress(String sessionId, String ip);
 }

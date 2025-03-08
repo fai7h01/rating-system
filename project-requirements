@@ -16,7 +16,7 @@ Rating System
 
   ✅ Core Functionality:
 
-    1) Creating Seller Profiles
+    1) Creating Seller Profiles $
     2) Submitting Comments for Sellers
     3) Calculating Seller Ratings
     4) Compiling Overall Top Sellers Based on Ratings
@@ -63,11 +63,11 @@ Rating System
 
       REST Endpoints for Comments:
 
-        * POST        /users/:id/comments: Add a comment linked to a user.
-        * GET         /users/:id/comments: List of seller's comments.
-        * GET         /users/:id/comments/:id: View a specific comment.
-        * DELETE      /users/:id/comments/:id: Delete a comment (only the author can delete).
-        * PUT         /users/:id/comments: Update a comment.
+        * POST        /users/:id/ratings: Add a comment linked to a user.
+        * GET         /users/:id/ratings: List of seller's comments.
+        * GET         /users/:id/ratings/:id: View a specific comment.
+        * DELETE      /users/:id/ratings/:id: Delete a comment (only the author can delete).
+        * PUT         /users/:id/ratings: Update a comment.
 
     👉 Game Object Model:
 

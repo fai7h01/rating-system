@@ -20,5 +20,5 @@ public class RatingDTO {
     private UserDTO author;
     private AnonymousUserDTO anonymousAuthor;
     private CommentDTO comment;
-    private GameObjectDTO gameObject;
+    private UserDTO seller;
 }

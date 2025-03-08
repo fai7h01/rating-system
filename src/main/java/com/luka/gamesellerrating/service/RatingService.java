@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface RatingService {
 
-    RatingDTO save(RatingDTO rating, String sessionId, String ipAddress);
+    RatingDTO save(Long sellerId, RatingDTO rating, String sessionId, String ipAddress);
     List<RatingDTO> findAllBySeller(Long sellerId);
-    void delete(Long id);
-
 }

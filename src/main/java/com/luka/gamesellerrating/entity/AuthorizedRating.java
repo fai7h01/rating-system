@@ -18,6 +18,6 @@ import org.hibernate.annotations.SQLRestriction;
 public class AuthorizedRating extends Rating{
 
     @ManyToOne
-    @JoinColumn(name = "author_id", nullable = false)
+    @JoinColumn(name = "authorized_author_id", nullable = false)
     private User author;
 }

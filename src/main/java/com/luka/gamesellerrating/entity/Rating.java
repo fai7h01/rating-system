@@ -30,7 +30,7 @@ public abstract class Rating extends BaseEntity{
     private Comment comment;
 
     @ManyToOne
-    @JoinColumn(name = "game_object_id", nullable = false)
-    private GameObject gameObject;
+    @JoinColumn(name = "seller_id", nullable = false)
+    private User seller;
 
 }

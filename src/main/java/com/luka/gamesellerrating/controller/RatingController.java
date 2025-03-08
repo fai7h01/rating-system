@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/ratings")
+@RequestMapping("/sellers/{sellerId}/ratings")
 public class RatingController {
 
     private final RatingService ratingService;
@@ -18,9 +18,13 @@ public class RatingController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseWrapper> submitRating(@RequestBody RatingDTO rating, HttpServletRequest request) {
-        ratingService.save(rating, request.getSession().getId(), request.getRemoteAddr());
-        return ResponseEntity.ok(ResponseWrapper.builder().message("Rating submitted successfully.").build());
+    public ResponseEntity<ResponseWrapper> submitRating(@PathVariable("sellerId") Long sellerId,
+                                                        @RequestBody RatingDTO rating,
+                                                        HttpServletRequest request) {
+        RatingDTO savedRating = ratingService.save(sellerId, rating, request.getSession().getId(), request.getRemoteAddr());
+        return ResponseEntity.ok(ResponseWrapper.builder()
+                .data(savedRating)
+                .message("Rating submitted successfully.").build());
     }
 
     @GetMapping("/{id}")
