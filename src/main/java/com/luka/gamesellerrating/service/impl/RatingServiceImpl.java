@@ -1,14 +1,18 @@
 package com.luka.gamesellerrating.service.impl;
 
+import com.luka.gamesellerrating.dto.AnonymousUserDTO;
 import com.luka.gamesellerrating.dto.RatingDTO;
 import com.luka.gamesellerrating.entity.AnonymousRating;
 import com.luka.gamesellerrating.entity.AuthorizedRating;
+import com.luka.gamesellerrating.entity.Rating;
+import com.luka.gamesellerrating.exception.RatingAlreadyExistsException;
 import com.luka.gamesellerrating.repository.RatingRepository;
 import com.luka.gamesellerrating.service.AnonymousUserService;
 import com.luka.gamesellerrating.service.KeycloakService;
 import com.luka.gamesellerrating.service.RatingService;
 import com.luka.gamesellerrating.service.UserService;
 import com.luka.gamesellerrating.util.MapperUtil;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,46 +38,59 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingDTO save(Long sellerId, RatingDTO rating, String sessionId, String ipAddress) {
-        if (keycloakService.isUserAnonymous()) {
-            return saveAnonymous(sellerId, rating, sessionId, ipAddress);
-        }
-        return saveAuthorized(sellerId, rating);
-    }
-
-    private RatingDTO saveAnonymous(Long sellerId, RatingDTO rating, String sessionId, String ipAddress) {
-        //check if seller exists
         var seller = userService.findById(sellerId);
-        if (ratingRepository.existsAnonymousRating(sellerId, sessionId, ipAddress)) {
-            throw new RuntimeException("You have already rated this seller.");
-        }
-        var anonymousUser = anonymousUserService.findBySessionIdAndIpAddress(sessionId, ipAddress)
-                .orElseGet(() -> anonymousUserService.save(sessionId, ipAddress));
         rating.setSeller(seller);
-        rating.setAnonymousAuthor(anonymousUser);
-        var ratingToSave = mapperUtil.convert(rating, new AnonymousRating());
-        var savedRating = ratingRepository.save(ratingToSave);
-        return mapperUtil.convert(savedRating, new RatingDTO());
+        return keycloakService.isUserAnonymous()
+                ? saveAnonymous(rating, sessionId, ipAddress)
+                : saveAuthorized(rating);
     }
 
-    private RatingDTO saveAuthorized(Long sellerId, RatingDTO rating) {
-        var loggedInUser = keycloakService.getLoggedInUser();
-        var seller = userService.findById(sellerId);
-        if (ratingRepository.existsAuthorizedRating(sellerId, loggedInUser.getId())) {
-            throw new RuntimeException("You have already rated this seller.");
-        }
-        rating.setSeller(seller);
-        rating.setAuthor(loggedInUser);
-        var ratingToSave = mapperUtil.convert(rating, new AuthorizedRating());
-        var savedRating = ratingRepository.save(ratingToSave);
-        return mapperUtil.convert(savedRating, new RatingDTO());
-    }
 
+    @Transactional
     @Override
     public List<RatingDTO> findAllBySeller(Long sellerId) {
         return ratingRepository.findAllBySellerId(sellerId)
                 .stream()
                 .map(rating -> mapperUtil.convert(rating, new RatingDTO()))
                 .toList();
+    }
+
+    private RatingDTO saveAnonymous(RatingDTO rating, String sessionId, String ipAddress) {
+        checkDuplicateAnonymousRating(rating.getSeller().getId(), sessionId, ipAddress);
+        var anonymousUser = getOrCreateAnonymousUser(sessionId, ipAddress);
+        rating.setAnonymousAuthor(anonymousUser);
+        return persistRating(rating, new AnonymousRating());
+    }
+
+
+    private RatingDTO saveAuthorized(RatingDTO rating) {
+        var loggedInUser = keycloakService.getLoggedInUser();
+        checkDuplicateAuthorizedRating(rating.getSeller().getId(), loggedInUser.getId());
+        rating.setAuthor(loggedInUser);
+        return persistRating(rating, new AuthorizedRating());
+    }
+
+    private <T extends Rating> RatingDTO persistRating(RatingDTO rating, T ratingClass) {
+        var ratingToSave = mapperUtil.convert(rating, ratingClass);
+        var savedRating = ratingRepository.save(ratingToSave);
+        return mapperUtil.convert(savedRating, new RatingDTO());
+    }
+
+    private void checkDuplicateAnonymousRating(Long sellerId, String sessionId, String ipAddress) {
+        if (ratingRepository.existsAnonymousRating(sellerId, sessionId, ipAddress)) {
+            throw new RatingAlreadyExistsException("You have already rated this seller.");
+        }
+    }
+
+    private void checkDuplicateAuthorizedRating(Long sellerId, Long userId) {
+        if (ratingRepository.existsAuthorizedRating(sellerId, userId)) {
+            throw new RatingAlreadyExistsException("You have already rated this seller.");
+        }
+    }
+
+    private AnonymousUserDTO getOrCreateAnonymousUser(String sessionId, String ipAddress) {
+        return anonymousUserService.findBySessionIdAndIpAddress(sessionId, ipAddress)
+                .orElseGet(() -> anonymousUserService.save(sessionId, ipAddress));
     }
 
 }
