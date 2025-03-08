@@ -15,7 +15,6 @@ public class AnonymousUserDTO {
 
     private Long id;
     private String username;
-    private String sessionId;
-    private String ipAddress;
+    private String identifier;
 
 }

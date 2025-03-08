@@ -17,8 +17,7 @@ import org.hibernate.annotations.SQLRestriction;
 public class AnonymousUser extends BaseEntity{
 
     private String username;
-    private String sessionId;
-    private String ipAddress;
+    private String identifier;
 
     public AnonymousUser() {
         this.username = Faker.instance().name().username();

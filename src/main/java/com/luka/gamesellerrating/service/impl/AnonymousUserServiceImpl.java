@@ -22,21 +22,20 @@ public class AnonymousUserServiceImpl implements AnonymousUserService {
 
 
     @Override
-    public AnonymousUserDTO save(String sessionId, String ipAddress) {
-        var foundAnonymousUser = anonymousUserRepository.findBySessionIdAndIpAddress(ipAddress, sessionId);
+    public AnonymousUserDTO save(String identifier) {
+        var foundAnonymousUser = anonymousUserRepository.findByIdentifier(identifier);
         if (foundAnonymousUser.isPresent()) {
             return mapperUtil.convert(foundAnonymousUser.get(), new AnonymousUserDTO());
         }
         var anonymousUser = new AnonymousUser();
-        anonymousUser.setSessionId(sessionId);
-        anonymousUser.setIpAddress(ipAddress);
+        anonymousUser.setIdentifier(identifier);
         var savedAnonymousUser = anonymousUserRepository.save(anonymousUser);
         return mapperUtil.convert(savedAnonymousUser, new AnonymousUserDTO());
     }
 
     @Override
-    public Optional<AnonymousUserDTO> findBySessionIdAndIpAddress(String sessionId, String ipAddress) {
-        var foundAnonymousUser = anonymousUserRepository.findBySessionIdAndIpAddress(ipAddress, sessionId);
+    public Optional<AnonymousUserDTO> findByIdentifier(String identifier) {
+        var foundAnonymousUser = anonymousUserRepository.findByIdentifier(identifier);
         return foundAnonymousUser.map(anonymousUser -> mapperUtil.convert(anonymousUser, new AnonymousUserDTO()));
     }
 

@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface AnonymousUserRepository extends JpaRepository<AnonymousUser, Long> {
 
-    Optional<AnonymousUser> findBySessionIdAndIpAddress(String sessionId, String ip);
+    Optional<AnonymousUser> findByIdentifier(String identifier);
 }

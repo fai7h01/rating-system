@@ -20,11 +20,9 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     @Query("SELECT CASE WHEN COUNT(anr) > 0 THEN true ELSE false END " +
             "FROM AnonymousRating anr " +
             "WHERE anr.seller.id = :sellerId " +
-            "AND anr.anonymousAuthor.sessionId = :sessionId " +
-            "AND anr.anonymousAuthor.ipAddress = :ipAddress")
+            "AND anr.anonymousAuthor.identifier = :identifier")
     boolean existsAnonymousRating(@Param("sellerId") Long sellerId,
-                                  @Param("sessionId") String sessionId,
-                                  @Param("ipAddress") String ipAddress);
+                                  @Param("identifier") String sessionId);
 
     Optional<Rating> findBySellerIdAndId(Long sellerId, Long ratingId);
 }

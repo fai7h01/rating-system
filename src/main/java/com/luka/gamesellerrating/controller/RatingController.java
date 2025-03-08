@@ -3,7 +3,6 @@ package com.luka.gamesellerrating.controller;
 import com.luka.gamesellerrating.dto.RatingDTO;
 import com.luka.gamesellerrating.dto.wrapper.ResponseWrapper;
 import com.luka.gamesellerrating.service.RatingService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +23,8 @@ public class RatingController {
 
     @PostMapping
     public ResponseEntity<ResponseWrapper> submitRating(@PathVariable("sellerId") Long sellerId,
-                                                        @RequestBody RatingDTO rating,
-                                                        HttpServletRequest request) {
-        RatingDTO savedRating = ratingService.save(sellerId, rating, request.getSession().getId(), request.getRemoteAddr());
+                                                        @RequestBody RatingDTO rating) {
+        RatingDTO savedRating = ratingService.save(sellerId, rating);
         return ok(ResponseWrapper.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())

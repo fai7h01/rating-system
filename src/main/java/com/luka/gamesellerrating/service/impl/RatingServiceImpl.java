@@ -1,7 +1,6 @@
 package com.luka.gamesellerrating.service.impl;
 
 import com.luka.gamesellerrating.dto.AnonymousUserDTO;
-import com.luka.gamesellerrating.dto.CommentDTO;
 import com.luka.gamesellerrating.dto.RatingDTO;
 import com.luka.gamesellerrating.entity.AnonymousRating;
 import com.luka.gamesellerrating.entity.AuthorizedRating;
@@ -9,10 +8,10 @@ import com.luka.gamesellerrating.entity.Comment;
 import com.luka.gamesellerrating.entity.Rating;
 import com.luka.gamesellerrating.exception.RatingAlreadyExistsException;
 import com.luka.gamesellerrating.exception.RatingNotFoundException;
-import com.luka.gamesellerrating.repository.CommentRepository;
 import com.luka.gamesellerrating.repository.RatingRepository;
 import com.luka.gamesellerrating.service.*;
 import com.luka.gamesellerrating.util.MapperUtil;
+import com.luka.gamesellerrating.util.RequestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -27,25 +26,27 @@ public class RatingServiceImpl implements RatingService {
     private final UserService userService;
     private final KeycloakService keycloakService;
     private final CommentService commentService;
+    private final RequestUtil requestUtil;
     private final MapperUtil mapperUtil;
 
     public RatingServiceImpl(RatingRepository ratingRepository, AnonymousUserService anonymousUserService, UserService userService,
-                             KeycloakService keycloakService, CommentService commentService, MapperUtil mapperUtil) {
+                             KeycloakService keycloakService, CommentService commentService, RequestUtil requestUtil, MapperUtil mapperUtil) {
         this.ratingRepository = ratingRepository;
         this.anonymousUserService = anonymousUserService;
         this.userService = userService;
         this.keycloakService = keycloakService;
         this.commentService = commentService;
+        this.requestUtil = requestUtil;
         this.mapperUtil = mapperUtil;
     }
 
 
     @Override
-    public RatingDTO save(Long sellerId, RatingDTO rating, String sessionId, String ipAddress) {
+    public RatingDTO save(Long sellerId, RatingDTO rating) {
         var seller = userService.findById(sellerId);
         rating.setSeller(seller);
         return keycloakService.isUserAnonymous()
-                ? saveAnonymous(rating, sessionId, ipAddress)
+                ? saveAnonymous(rating, requestUtil)
                 : saveAuthorized(rating);
     }
 
@@ -64,9 +65,10 @@ public class RatingServiceImpl implements RatingService {
         return mapperUtil.convert(foundRating, new RatingDTO());
     }
 
-    private RatingDTO saveAnonymous(RatingDTO rating, String sessionId, String ipAddress) {
-        checkDuplicateAnonymousRating(rating.getSeller().getId(), sessionId, ipAddress);
-        var anonymousUser = getOrCreateAnonymousUser(sessionId, ipAddress);
+    private RatingDTO saveAnonymous(RatingDTO rating, RequestUtil requestUtil) {
+        var identifier = requestUtil.getSessionId().concat("-").concat(requestUtil.getClientIp());
+        checkDuplicateAnonymousRating(rating.getSeller().getId(),identifier);
+        var anonymousUser = getOrCreateAnonymousUser(identifier);
         rating.setAnonymousAuthor(anonymousUser);
         return persistRating(rating, new AnonymousRating());
     }
@@ -87,8 +89,8 @@ public class RatingServiceImpl implements RatingService {
         return mapperUtil.convert(savedRating, new RatingDTO());
     }
 
-    private void checkDuplicateAnonymousRating(Long sellerId, String sessionId, String ipAddress) {
-        if (ratingRepository.existsAnonymousRating(sellerId, sessionId, ipAddress)) {
+    private void checkDuplicateAnonymousRating(Long sellerId, String identifier) {
+        if (ratingRepository.existsAnonymousRating(sellerId, identifier)) {
             throw new RatingAlreadyExistsException("You have already rated this seller.");
         }
     }
@@ -99,9 +101,9 @@ public class RatingServiceImpl implements RatingService {
         }
     }
 
-    private AnonymousUserDTO getOrCreateAnonymousUser(String sessionId, String ipAddress) {
-        return anonymousUserService.findBySessionIdAndIpAddress(sessionId, ipAddress)
-                .orElseGet(() -> anonymousUserService.save(sessionId, ipAddress));
+    private AnonymousUserDTO getOrCreateAnonymousUser(String identifier) {
+        return anonymousUserService.findByIdentifier(identifier)
+                .orElseGet(() -> anonymousUserService.save(identifier));
     }
 
 }

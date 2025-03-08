@@ -6,6 +6,6 @@ import java.util.Optional;
 
 public interface AnonymousUserService {
 
-    AnonymousUserDTO save(String sessionId, String ipAddress);
-    Optional<AnonymousUserDTO> findBySessionIdAndIpAddress(String sessionId, String ipAddress);
+    AnonymousUserDTO save(String identifier);
+    Optional<AnonymousUserDTO> findByIdentifier(String identifier);
 }
