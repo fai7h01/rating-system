@@ -14,6 +14,7 @@ import com.luka.gamesellerrating.util.MapperUtil;
 import com.luka.gamesellerrating.util.RequestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -42,12 +43,16 @@ public class RatingServiceImpl implements RatingService {
 
 
     @Override
+    @Transactional
     public RatingDTO save(Long sellerId, RatingDTO rating) {
         var seller = userService.findById(sellerId);
         rating.setSeller(seller);
-        return keycloakService.isUserAnonymous()
-                ? saveAnonymous(rating, requestUtil)
-                : saveAuthorized(rating);
+        boolean isUserAnonymous = keycloakService.isUserAnonymous();
+        var preparedRating = isUserAnonymous
+                ? prepareAnonymousRating(rating)
+                : prepareAuthorizedRating(rating);
+        var targetEntity = isUserAnonymous ? new AnonymousRating() : new AuthorizedRating();
+        return persistRating(preparedRating, targetEntity);
     }
 
     @Override
@@ -65,32 +70,32 @@ public class RatingServiceImpl implements RatingService {
         return mapperUtil.convert(foundRating, new RatingDTO());
     }
 
-    private RatingDTO saveAnonymous(RatingDTO rating, RequestUtil requestUtil) {
-        var identifier = requestUtil.generateDeviceFingerprint();
-        checkDuplicateAnonymousRating(rating.getSeller().getId(),identifier);
-        var anonymousUser = getOrCreateAnonymousUser(identifier);
-        rating.setAnonymousAuthor(anonymousUser);
-        return persistRating(rating, new AnonymousRating());
-    }
-
-
-    private RatingDTO saveAuthorized(RatingDTO rating) {
-        var loggedInUser = keycloakService.getLoggedInUser();
-        checkDuplicateAuthorizedRating(rating.getSeller().getId(), loggedInUser.getId());
-        rating.setAuthor(loggedInUser);
-        return persistRating(rating, new AuthorizedRating());
-    }
-
-    private <T extends Rating> RatingDTO persistRating(RatingDTO rating, T ratingClass) {
-        var ratingToSave = mapperUtil.convert(rating, ratingClass);
+    private <T extends Rating> RatingDTO persistRating(RatingDTO rating, T targetEntity) {
+        var ratingToSave = mapperUtil.convert(rating, targetEntity);
         var savedComment = commentService.save(rating.getComment());
         ratingToSave.setComment(mapperUtil.convert(savedComment, new Comment()));
         var savedRating = ratingRepository.save(ratingToSave);
         return mapperUtil.convert(savedRating, new RatingDTO());
     }
 
-    private void checkDuplicateAnonymousRating(Long sellerId, String identifier) {
-        if (ratingRepository.existsAnonymousRating(sellerId, identifier)) {
+    private RatingDTO prepareAnonymousRating(RatingDTO rating) {
+        var identifier = requestUtil.generateDeviceFingerprint();
+        checkDuplicateAnonymousRating(rating.getSeller().getId(), identifier);
+        var anonymousUser = getOrCreateAnonymousUser(identifier);
+        rating.setAnonymousAuthor(anonymousUser);
+        return rating;
+    }
+
+
+    private RatingDTO prepareAuthorizedRating(RatingDTO rating) {
+        var loggedInUser = keycloakService.getLoggedInUser();
+        checkDuplicateAuthorizedRating(rating.getSeller().getId(), loggedInUser.getId());
+        rating.setAuthor(loggedInUser);
+        return rating;
+    }
+
+    private void checkDuplicateAnonymousRating(Long sellerId, String anonymousIdentifier) {
+        if (ratingRepository.existsAnonymousRating(sellerId, anonymousIdentifier)) {
             throw new RatingAlreadyExistsException("You have already rated this seller.");
         }
     }
