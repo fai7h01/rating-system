@@ -32,5 +32,5 @@ public class UserDTO {
     @JsonProperty(access = READ_ONLY)
     private BigDecimal overallRating;
     @JsonProperty(access = READ_ONLY)
-    private UserStatus status;
+    private UserStatus status = UserStatus.PENDING;
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum UserStatus {
 
     ACTIVE("Active"),
+    INACTIVE("Inactive"),
     PENDING("Pending"),
     REJECTED("Rejected");
 

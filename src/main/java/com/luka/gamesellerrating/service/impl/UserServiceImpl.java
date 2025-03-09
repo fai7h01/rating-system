@@ -3,6 +3,7 @@ package com.luka.gamesellerrating.service.impl;
 import com.luka.gamesellerrating.dto.UserDTO;
 import com.luka.gamesellerrating.entity.User;
 import com.luka.gamesellerrating.enums.Role;
+import com.luka.gamesellerrating.enums.UserStatus;
 import com.luka.gamesellerrating.exception.UserAlreadyExistsException;
 import com.luka.gamesellerrating.exception.UserNotFoundException;
 import com.luka.gamesellerrating.repository.UserRepository;
@@ -27,6 +28,13 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
         this.keycloakService = keycloakService;
         this.mapperUtil = mapperUtil;
+    }
+
+    @Override
+    public List<UserDTO> findAll() {
+        return userRepository.findAll().stream()
+                .map(user -> mapperUtil.convert(user, new UserDTO()))
+                .toList();
     }
 
     @Override
@@ -63,6 +71,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAllByRole(Role.Seller).stream()
                 .map(user -> mapperUtil.convert(user, new UserDTO()))
                 .toList();
+    }
+
+    public void updateStatus(Long id, UserStatus status) {
+        var foundUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+        foundUser.setStatus(status);
+        userRepository.save(foundUser);
     }
 
     private void validateNewUser(UserDTO user) {
