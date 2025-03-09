@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,5 +29,7 @@ public class User extends BaseEntity{
     private String confirmPassword;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @Column(precision = 3, scale = 2)
+    private BigDecimal overallRating;
 
 }
