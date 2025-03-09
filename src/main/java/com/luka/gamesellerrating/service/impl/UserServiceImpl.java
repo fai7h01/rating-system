@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -48,6 +49,13 @@ public class UserServiceImpl implements UserService {
     public UserDTO findByUsername(String username) {
         var foundUser = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new UserNotFoundException("User not found."));
         return mapperUtil.convert(foundUser, new UserDTO());
+    }
+
+    @Override
+    public List<UserDTO> findAllSellers() {
+        return userRepository.findAllByRole(Role.Seller).stream()
+                .map(user -> mapperUtil.convert(user, new UserDTO()))
+                .toList();
     }
 
     private void validateNewUser(UserDTO user) {
