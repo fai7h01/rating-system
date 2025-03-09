@@ -1,6 +1,5 @@
 package com.luka.gamesellerrating.controller;
 
-import com.luka.gamesellerrating.dto.UserDTO;
 import com.luka.gamesellerrating.dto.wrapper.ResponseWrapper;
 import com.luka.gamesellerrating.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -33,12 +32,12 @@ public class SellerController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ResponseWrapper> findSellerByUsername(@RequestParam("username") String username) {
+    public ResponseEntity<ResponseWrapper> findSellersByUsername(@RequestParam("username") String username) {
             return ok(ResponseWrapper.builder()
                     .success(true)
                     .code(HttpStatus.OK.value())
-                    .message("Seller retrieved successfully")
-                    .data(userService.findSellerByUsername(username))
+                    .message("Seller(s) retrieved successfully")
+                    .data(userService.findSellersByUsernameContaining(username))
                     .build());
     }
 

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
-@RequestMapping("/api/v1/sellers/{id}/ratings")
+@RequestMapping("/api/v1/sellers/{sellerId}/ratings")
 public class RatingController {
 
     private final RatingService ratingService;
@@ -20,7 +20,7 @@ public class RatingController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseWrapper> submitRating(@PathVariable("id") Long sellerId,
+    public ResponseEntity<ResponseWrapper> submitRating(@PathVariable("sellerId") Long sellerId,
                                                         @RequestBody RatingDTO rating) {
         return ok(ResponseWrapper.builder()
                 .success(true)
@@ -31,7 +31,7 @@ public class RatingController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseWrapper> getSellerRatings(@PathVariable("id") Long sellerId) {
+    public ResponseEntity<ResponseWrapper> getSellerRatings(@PathVariable("sellerId") Long sellerId) {
         return ok(ResponseWrapper.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
@@ -40,9 +40,9 @@ public class RatingController {
                 .build());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseWrapper> getRating(@PathVariable("id") Long sellerId,
-                                                     @PathVariable("id") Long ratingId) {
+    @GetMapping("/{ratingId}")
+    public ResponseEntity<ResponseWrapper> getRating(@PathVariable("sellerId") Long sellerId,
+                                                     @PathVariable("ratingId") Long ratingId) {
         return ok(ResponseWrapper.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
