@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum RatingStatus {
 
-    CONFIRMED("Confirmed"),
+    APPROVED("Approved"),
     PENDING("Pending"),
     REJECTED("Rejected");
 

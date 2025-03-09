@@ -6,6 +6,7 @@ import com.luka.gamesellerrating.entity.AnonymousRating;
 import com.luka.gamesellerrating.entity.AuthorizedRating;
 import com.luka.gamesellerrating.entity.Comment;
 import com.luka.gamesellerrating.entity.Rating;
+import com.luka.gamesellerrating.enums.RatingStatus;
 import com.luka.gamesellerrating.exception.RatingAlreadyExistsException;
 import com.luka.gamesellerrating.exception.RatingNotFoundException;
 import com.luka.gamesellerrating.repository.RatingRepository;
@@ -68,6 +69,14 @@ public class RatingServiceImpl implements RatingService {
         var foundRating = ratingRepository.findBySellerIdAndId(sellerId, ratingId)
                 .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
         return mapperUtil.convert(foundRating, new RatingDTO());
+    }
+
+    @Override
+    public void updateStatus(Long ratingId, RatingStatus status) {
+        var rating = ratingRepository.findById(ratingId)
+                .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
+        rating.setStatus(status);
+        ratingRepository.save(rating);
     }
 
     private <T extends Rating> RatingDTO persistRating(RatingDTO rating, T targetEntity) {

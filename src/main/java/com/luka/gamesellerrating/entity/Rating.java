@@ -23,9 +23,6 @@ public abstract class Rating extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private RatingValue rating;
 
-    @Column(name = "approved")
-    private boolean approved;
-
     @OneToOne
     @JoinColumn(name = "comment_id", nullable = false)
     private Comment comment;
