@@ -38,6 +38,7 @@ public class SellerController {
                     .success(true)
                     .code(HttpStatus.OK.value())
                     .message("Seller retrieved successfully")
+                    .data(userService.findSellerByUsername(username))
                     .build());
     }
 

@@ -52,6 +52,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDTO findSellerByUsername(String username) {
+        return userRepository.findByUsernameIgnoreCaseAndRole(username, Role.Seller)
+                .map(user -> mapperUtil.convert(user, new UserDTO()))
+                .orElseThrow(() -> new UserNotFoundException("Seller not found."));
+    }
+
+    @Override
     public List<UserDTO> findAllSellers() {
         return userRepository.findAllByRole(Role.Seller).stream()
                 .map(user -> mapperUtil.convert(user, new UserDTO()))
