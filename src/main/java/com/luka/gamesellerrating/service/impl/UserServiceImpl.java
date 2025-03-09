@@ -11,6 +11,7 @@ import com.luka.gamesellerrating.service.UserService;
 import com.luka.gamesellerrating.util.MapperUtil;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -28,13 +29,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDTO save(UserDTO user) {
-        if (userRepository.existsByEmailIgnoreCase(user.getEmail())) {
-            throw new UserAlreadyExistsException("Email already in use.");
-        }
-        if (userRepository.existsByUsernameIgnoreCase(user.getUsername())) {
-            throw new UserAlreadyExistsException("Username already taken.");
-        }
+        validateNewUser(user);
         keycloakService.userCreate(user);
         var userEntity = mapperUtil.convert(user, new User());
         var savedEntity = userRepository.save(userEntity);
@@ -43,21 +40,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO findById(Long id) {
-        User foundUser = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found."));
+        var foundUser = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found."));
         return mapperUtil.convert(foundUser, new UserDTO());
     }
 
     @Override
     public UserDTO findByUsername(String username) {
-        User foundUser = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new UserNotFoundException("User not found."));
+        var foundUser = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new UserNotFoundException("User not found."));
         return mapperUtil.convert(foundUser, new UserDTO());
     }
 
-    @Override
-    public UserDTO findSellerByUsername(String username) {
-        var foundSeller = userRepository.findByUsernameIgnoreCaseAndRole(username, Role.Seller)
-                .orElseThrow(() -> new UserNotFoundException("Seller not found."));
-        return mapperUtil.convert(foundSeller, new UserDTO());
+    private void validateNewUser(UserDTO user) {
+        if (userRepository.existsByEmailIgnoreCase(user.getEmail())) {
+            throw new UserAlreadyExistsException("Email already in use.");
+        }
+        if (userRepository.existsByUsernameIgnoreCase(user.getUsername())) {
+            throw new UserAlreadyExistsException("Username already taken.");
+        }
     }
-
 }
