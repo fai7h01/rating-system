@@ -3,6 +3,7 @@ package com.luka.gamesellerrating.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.luka.gamesellerrating.enums.Role;
+import com.luka.gamesellerrating.enums.UserStatus;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -30,4 +31,6 @@ public class UserDTO {
     private Role role;
     @JsonProperty(access = READ_ONLY)
     private BigDecimal overallRating;
+    @JsonProperty(access = READ_ONLY)
+    private UserStatus status;
 }

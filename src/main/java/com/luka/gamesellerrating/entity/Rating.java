@@ -1,5 +1,6 @@
 package com.luka.gamesellerrating.entity;
 
+import com.luka.gamesellerrating.enums.RatingStatus;
 import com.luka.gamesellerrating.enums.RatingValue;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,5 +33,8 @@ public abstract class Rating extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "seller_id", nullable = false)
     private User seller;
+
+    @Enumerated(EnumType.STRING)
+    private RatingStatus status;
 
 }

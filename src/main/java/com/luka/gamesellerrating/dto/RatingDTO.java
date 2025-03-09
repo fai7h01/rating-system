@@ -2,6 +2,7 @@ package com.luka.gamesellerrating.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.luka.gamesellerrating.enums.RatingStatus;
 import com.luka.gamesellerrating.enums.RatingValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,4 +30,6 @@ public class RatingDTO {
     private UserDTO seller;
     @JsonProperty(access = READ_ONLY)
     private AnonymousUserDTO anonymousAuthor;
+    @JsonProperty(access = READ_ONLY)
+    private RatingStatus status;
 }
