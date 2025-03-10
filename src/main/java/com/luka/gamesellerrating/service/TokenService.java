@@ -7,6 +7,7 @@ public interface TokenService {
 
     Token generateToken(String email, TokenType type);
     boolean isTokenValid(String email, String tokenVal, TokenType type);
+    void validateToken(String email, String tokenVal);
 
 }
 

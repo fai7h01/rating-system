@@ -46,6 +46,11 @@ public class TokenServiceImpl implements TokenService {
         return true;
     }
 
+    @Override
+    public void validateToken(String email, String tokenVal) {
+
+    }
+
     private void validateEmail(String email) {
         if (!StringUtils.hasText(email)) {
             throw new IllegalArgumentException("Email is required");
@@ -54,7 +59,7 @@ public class TokenServiceImpl implements TokenService {
 
     private void validateTokenRequest(String email, String tokenValue) {
         if (!StringUtils.hasText(email) || !StringUtils.hasText(tokenValue)) {
-            throw new InvalidTokenException("Email and token are required");
+            throw new InvalidTokenException("Email and(or) token are required");
         }
     }
 
