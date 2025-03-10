@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByUsernameIgnoreCase(String username);
+    Optional<User> findByEmailIgnoreCase(String email);
 
     @Query("SELECT u FROM User u WHERE u.role = 'Seller' AND LOWER(u.username) LIKE LOWER(CONCAT('%', :username, '%'))")
     List<User> findAllByUsernameContainingAndRole(@Param("username") String username,

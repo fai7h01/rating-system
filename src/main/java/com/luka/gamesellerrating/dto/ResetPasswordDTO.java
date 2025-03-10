@@ -12,12 +12,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ForgotPasswordDTO {
+public class ResetPasswordDTO {
 
     @NotBlank
-    private String password;
+    private String code;
     @NotBlank
-    private String confirmPassword;
+    private String newPassword;
+
+
 
 
 }

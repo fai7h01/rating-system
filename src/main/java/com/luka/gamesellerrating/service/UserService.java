@@ -10,7 +10,7 @@ public interface UserService {
     List<UserDTO> findAll();
     UserDTO save(UserDTO user);
     UserDTO findById(Long id);
-    UserDTO findByUsername(String username);
+    UserDTO findByEmail(String email);
     List<UserDTO> findSellersByUsernameContaining(String username);
     List<UserDTO> findAllSellers();
     void updateStatus(Long id, UserStatus status);

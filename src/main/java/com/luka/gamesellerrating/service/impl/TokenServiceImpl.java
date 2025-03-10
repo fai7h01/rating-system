@@ -33,28 +33,20 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    @Transactional
-    public boolean isTokenValid(String email, String tokenValue, TokenType tokenType) {
-        validateTokenRequest(email, tokenValue);
+    public void validateToken(String email, String tokenVal, TokenType tokenType) {
+        validateTokenRequest(email, tokenVal);
 
         Token storedToken = getStoredToken(email, tokenType);
-        validateStoredToken(storedToken, tokenValue);
+        validateStoredToken(storedToken, tokenVal);
 
         removeToken(email, tokenType);
         log.debug("Token validated and removed for email: {}", email);
-
-        return true;
     }
 
-    @Override
-    public void validateToken(String email, String tokenVal) {
-
-    }
-
-    private void validateEmail(String email) {
-        if (!StringUtils.hasText(email)) {
-            throw new IllegalArgumentException("Email is required");
-        }
+    private void storeToken(Token token, TokenType type) {
+        String key = buildKey(token.getEmail(), type);
+        redisTemplate.delete(key);
+        redisTemplate.opsForValue().set(key, token, type.getDuration());
     }
 
     private void validateTokenRequest(String email, String tokenValue) {
@@ -75,10 +67,10 @@ public class TokenServiceImpl implements TokenService {
         }
     }
 
-    private void storeToken(Token token, TokenType type) {
-        String key = buildKey(token.getEmail(), type);
-        redisTemplate.delete(key);
-        redisTemplate.opsForValue().set(key, token, type.getDuration());
+    private void validateEmail(String email) {
+        if (!StringUtils.hasText(email)) {
+            throw new IllegalArgumentException("Email is required");
+        }
     }
 
     private Token getStoredToken(String email, TokenType type) {

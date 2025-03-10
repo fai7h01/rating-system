@@ -7,6 +7,7 @@ import com.luka.gamesellerrating.enums.UserStatus;
 import com.luka.gamesellerrating.exception.UserAlreadyExistsException;
 import com.luka.gamesellerrating.exception.UserNotFoundException;
 import com.luka.gamesellerrating.repository.UserRepository;
+import com.luka.gamesellerrating.service.EmailService;
 import com.luka.gamesellerrating.service.KeycloakService;
 import com.luka.gamesellerrating.service.UserService;
 import com.luka.gamesellerrating.util.MapperUtil;
@@ -15,18 +16,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final KeycloakService keycloakService;
+    private final EmailService emailService;
     private final MapperUtil mapperUtil;
 
-    public UserServiceImpl(UserRepository userRepository, @Lazy KeycloakService keycloakService, MapperUtil mapperUtil) {
+    public UserServiceImpl(UserRepository userRepository, @Lazy KeycloakService keycloakService, @Lazy EmailService emailService,
+                           MapperUtil mapperUtil) {
         this.userRepository = userRepository;
         this.keycloakService = keycloakService;
+        this.emailService = emailService;
         this.mapperUtil = mapperUtil;
     }
 
@@ -41,9 +44,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO save(UserDTO user) {
         validateNewUser(user);
-        keycloakService.userCreate(user);
         var userEntity = mapperUtil.convert(user, new User());
         var savedEntity = userRepository.save(userEntity);
+        keycloakService.userCreate(user);
+        emailService.sendVerificationEmail(savedEntity.getEmail());
         return mapperUtil.convert(savedEntity, new UserDTO());
     }
 
@@ -54,8 +58,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO findByUsername(String username) {
-        var foundUser = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new UserNotFoundException("User not found."));
+    public UserDTO findByEmail(String email) {
+        var foundUser = userRepository.findByEmailIgnoreCase(email).orElseThrow(() -> new UserNotFoundException("User not found."));
         return mapperUtil.convert(foundUser, new UserDTO());
     }
 
@@ -73,6 +77,7 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    @Override
     public void updateStatus(Long id, UserStatus status) {
         var foundUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
