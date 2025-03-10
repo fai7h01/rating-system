@@ -6,13 +6,16 @@ import com.luka.gamesellerrating.enums.TokenType;
 import com.luka.gamesellerrating.service.EmailService;
 import com.luka.gamesellerrating.service.TokenService;
 import com.luka.gamesellerrating.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
+@Slf4j
 @Service
 public class EmailServiceImpl implements EmailService {
 
@@ -33,7 +36,8 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendVerificationEmail(String email) {
+    @Async("asyncTaskExecutor")
+    public void sendUserVerificationEmail(String email) {
         SimpleMailMessage simpleMailMessage = createVerificationEmail(email);
         this.sendEmail(simpleMailMessage);
     }
@@ -44,16 +48,18 @@ public class EmailServiceImpl implements EmailService {
 
     private SimpleMailMessage createVerificationEmail(String email) {
         String fullName = findUserFullName(email);
-
         Token token = tokenService.generateToken(email, TokenType.VERIFICATION);
-        String message = createVerificationMessage(email, fullName, token.getToken(), token.getExpiryDate());
+        String subject = "Email Verification";
+        String message = createVerificationEmailMessage(email, fullName, token.getToken(), token.getExpiryDate());
+        return buildMailMessage(email, subject, message);
+    }
 
+    private SimpleMailMessage buildMailMessage(String to, String subject, String message) {
         SimpleMailMessage mail = new SimpleMailMessage();
-        mail.setFrom(fromEmail);
-        mail.setTo(email);
-        mail.setSubject("Account Verification");
+        mail.setFrom(this.fromEmail);
+        mail.setTo(to);
+        mail.setSubject(subject);
         mail.setText(message);
-
         return mail;
     }
 
@@ -62,13 +68,17 @@ public class EmailServiceImpl implements EmailService {
         return dto.getFirstName() + " " + dto.getLastName();
     }
 
-    private String createVerificationMessage(String email, String fullName, String token, LocalDate expiryDate) {
+    private String createVerificationEmailMessage(String email, String fullName, String token, LocalDate expiryDate) {
 
         String companyName = "Marketplace";
         String link = BASE_URL + "/api/v1/auth?email=" + email + "&token=" + token;
         String tokenExpiryDate = expiryDate.toString();
 
-        String messageDraft = """
+        return createVerificationEmailText(fullName, companyName, link, tokenExpiryDate);
+    }
+
+    private String createVerificationEmailText(String fullName, String companyName, String link, String tokenExpiryDate) {
+        return String.format("""
                 Dear %s,
                 
                 Thank you for registering with %s! We're excited to have you on board.
@@ -80,7 +90,6 @@ public class EmailServiceImpl implements EmailService {
                 If you did not registered to our application, you can safely ignore this email.
                 
                 For security reasons, this confirmation link will expire at %s. If the link expired, you will need to request a new confirmation.
-                """;
-        return String.format(messageDraft, fullName, companyName, link, tokenExpiryDate);
+                """, fullName, companyName, link, tokenExpiryDate);
     }
 }

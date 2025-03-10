@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
         var userEntity = mapperUtil.convert(user, new User());
         var savedEntity = userRepository.save(userEntity);
         keycloakService.userCreate(user);
-        emailService.sendVerificationEmail(savedEntity.getEmail());
+        emailService.sendUserVerificationEmail(savedEntity.getEmail());
         return mapperUtil.convert(savedEntity, new UserDTO());
     }
 
