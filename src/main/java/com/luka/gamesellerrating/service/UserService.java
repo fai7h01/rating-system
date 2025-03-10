@@ -14,4 +14,5 @@ public interface UserService {
     List<UserDTO> findSellersByUsernameContaining(String username);
     List<UserDTO> findAllSellers();
     void updateStatus(Long id, UserStatus status);
+    void verifyEmail(String email, String token);
 }

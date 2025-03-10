@@ -23,6 +23,8 @@ public class UserDTO {
     private String firstName;
     private String lastName;
     private String email;
+    @JsonProperty(access = READ_ONLY)
+    private boolean emailVerified;
     private String username;
     @JsonProperty(access = WRITE_ONLY)
     private String password;

@@ -16,11 +16,9 @@ import static org.springframework.http.ResponseEntity.ok;
 public class AuthController {
 
     private final UserService userService;
-    private final KeycloakService keycloakService;
 
-    public AuthController(UserService userService, KeycloakService keycloakService) {
+    public AuthController(UserService userService) {
         this.userService = userService;
-        this.keycloakService = keycloakService;
     }
 
     @PostMapping
@@ -36,7 +34,7 @@ public class AuthController {
     @GetMapping
     public ResponseEntity<ResponseWrapper> activateUserAccount(@RequestParam("email") String email,
                                                                @RequestParam("token") String token) {
-        keycloakService.verifyUserEmail(email, token);
+        userService.verifyEmail(email, token);
         return noContent().build();
     }
 }

@@ -85,6 +85,15 @@ public class UserServiceImpl implements UserService {
         userRepository.save(foundUser);
     }
 
+    @Override
+    public void verifyEmail(String email, String token) {
+        var foundUser = userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+        foundUser.setEmailVerified(true);
+        userRepository.save(foundUser);
+        keycloakService.verifyUserEmail(email, token);
+    }
+
     private void validateNewUser(UserDTO user) {
         if (userRepository.existsByEmailIgnoreCase(user.getEmail())) {
             throw new UserAlreadyExistsException("Email already in use.");
