@@ -2,12 +2,15 @@ package com.luka.gamesellerrating.service.impl;
 
 import com.luka.gamesellerrating.dto.Token;
 import com.luka.gamesellerrating.enums.TokenType;
+import com.luka.gamesellerrating.exception.InvalidTokenException;
 import com.luka.gamesellerrating.service.TokenService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+@Slf4j
 @Service
 public class TokenServiceImpl implements TokenService {
 
@@ -20,29 +23,68 @@ public class TokenServiceImpl implements TokenService {
     @Override
     @Transactional
     public Token generateToken(String email, TokenType tokenType) {
-        if (!StringUtils.hasText(email)) {
-            throw new IllegalArgumentException("Email is required");
-        }
+        validateEmail(email);
+
         Token token = Token.create(email, tokenType);
-        String key = tokenType.getRedisPrefix().concat(email);
-        redisTemplate.delete(key);
-        redisTemplate.opsForValue().set(key, token, tokenType.getDuration());
+        storeToken(token, tokenType);
+
+        log.debug("Generated {} token for email: {}", tokenType, email);
         return token;
     }
 
     @Override
     @Transactional
-    public boolean isTokenValid(String email, String tokenVal, TokenType type) {
-        if (!StringUtils.hasText(email) || !StringUtils.hasText(tokenVal)) {
-            throw new IllegalArgumentException("Email and token are required");
-        }
-        String key = type.getRedisPrefix() + email;
-        Token token = redisTemplate.opsForValue().get(key);
+    public boolean isTokenValid(String email, String tokenValue, TokenType tokenType) {
+        validateTokenRequest(email, tokenValue);
 
-        if (token != null && token.getToken().equals(tokenVal) && token.isValid()) {
-            redisTemplate.delete(key);
-            return true;
+        Token storedToken = getStoredToken(email, tokenType);
+        validateStoredToken(storedToken, tokenValue);
+
+        removeToken(email, tokenType);
+        log.debug("Token validated and removed for email: {}", email);
+
+        return true;
+    }
+
+    private void validateEmail(String email) {
+        if (!StringUtils.hasText(email)) {
+            throw new IllegalArgumentException("Email is required");
         }
-        return false;
+    }
+
+    private void validateTokenRequest(String email, String tokenValue) {
+        if (!StringUtils.hasText(email) || !StringUtils.hasText(tokenValue)) {
+            throw new InvalidTokenException("Email and token are required");
+        }
+    }
+
+    private void validateStoredToken(Token token, String tokenValue) {
+        if (token == null) {
+            throw new InvalidTokenException("Token not found");
+        }
+        if (!token.isValid()) {
+            throw new InvalidTokenException("Token has expired");
+        }
+        if (!token.getToken().equals(tokenValue)) {
+            throw new InvalidTokenException("Invalid token");
+        }
+    }
+
+    private void storeToken(Token token, TokenType type) {
+        String key = buildKey(token.getEmail(), type);
+        redisTemplate.delete(key);
+        redisTemplate.opsForValue().set(key, token, type.getDuration());
+    }
+
+    private Token getStoredToken(String email, TokenType type) {
+        return redisTemplate.opsForValue().get(buildKey(email, type));
+    }
+
+    private void removeToken(String email, TokenType type) {
+        redisTemplate.delete(buildKey(email, type));
+    }
+
+    private String buildKey(String email, TokenType type) {
+        return type.getRedisPrefix() + email;
     }
 }
