@@ -24,10 +24,8 @@ public class TokenServiceImpl implements TokenService {
     @Transactional
     public Token generateToken(String email, TokenType tokenType) {
         validateEmail(email);
-
         Token token = Token.create(email, tokenType);
         storeTokenInCache(token, tokenType);
-
         log.debug("Generated {} token for email: {}", tokenType, email);
         return token;
     }
@@ -35,10 +33,8 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public void validateToken(String email, String tokenVal, TokenType tokenType) {
         validateTokenRequest(email, tokenVal);
-
         Token storedToken = getStoredTokenFromCache(email, tokenType);
         validateStoredToken(storedToken, tokenVal);
-
         removeTokenFromCache(email, tokenType);
         log.debug("Token validated and removed for email: {}", email);
     }

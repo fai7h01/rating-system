@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.ResponseEntity.ok;
+import static org.springframework.http.ResponseEntity.status;
 
 @RestController
 @RequestMapping("/api/v1/sellers/{sellerId}/ratings")
@@ -22,9 +23,9 @@ public class RatingController {
     @PostMapping
     public ResponseEntity<ResponseWrapper> submitRating(@PathVariable("sellerId") Long sellerId,
                                                         @RequestBody RatingDTO rating) {
-        return ok(ResponseWrapper.builder()
+        return status(HttpStatus.CREATED).body(ResponseWrapper.builder()
                 .success(true)
-                .code(HttpStatus.OK.value())
+                .code(HttpStatus.CREATED.value())
                 .message("Rating submitted successfully.")
                 .data(ratingService.save(sellerId, rating))
                 .build());

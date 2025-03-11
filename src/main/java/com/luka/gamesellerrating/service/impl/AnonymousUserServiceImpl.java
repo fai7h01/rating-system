@@ -38,5 +38,4 @@ public class AnonymousUserServiceImpl implements AnonymousUserService {
         var foundAnonymousUser = anonymousUserRepository.findByIdentifier(identifier);
         return foundAnonymousUser.map(anonymousUser -> mapperUtil.convert(anonymousUser, new AnonymousUserDTO()));
     }
-
 }

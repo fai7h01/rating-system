@@ -10,8 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static org.springframework.http.ResponseEntity.noContent;
-import static org.springframework.http.ResponseEntity.ok;
+import static org.springframework.http.ResponseEntity.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -28,9 +27,9 @@ public class AuthController {
     @PostMapping
     public ResponseEntity<ResponseWrapper> registerUser(@RequestBody UserDTO user) {
         UserDTO registeredUser = userService.save(user);
-        return ok(ResponseWrapper.builder()
+        return status(HttpStatus.CREATED).body(ResponseWrapper.builder()
                 .success(true)
-                .code(HttpStatus.OK.value())
+                .code(HttpStatus.CREATED.value())
                 .message("User is successfully registered.")
                 .data(registeredUser).build());
     }

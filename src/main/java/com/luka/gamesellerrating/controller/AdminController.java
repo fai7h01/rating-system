@@ -37,14 +37,14 @@ public class AdminController {
 
     @PutMapping("/users/{id}/status")
     public ResponseEntity<Void> updateUserStatus(@PathVariable("id") Long id,
-                                             @RequestParam("status") UserStatus status) {
+                                                 @RequestParam("status") UserStatus status) {
         userService.updateStatus(id, status);
         return noContent().build();
     }
 
     @PutMapping("/ratings/{id}/status")
     public ResponseEntity<Void> updateRatingStatus(@PathVariable("id") Long id,
-                                             @RequestParam("status") RatingStatus status) {
+                                                   @RequestParam("status") RatingStatus status) {
         ratingService.updateStatus(id, status);
         return noContent().build();
     }

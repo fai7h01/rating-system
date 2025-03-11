@@ -12,6 +12,7 @@ import com.luka.gamesellerrating.service.EmailService;
 import com.luka.gamesellerrating.service.KeycloakService;
 import com.luka.gamesellerrating.service.UserService;
 import com.luka.gamesellerrating.util.MapperUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -20,10 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
-    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
     private final KeycloakService keycloakService;
     private final EmailService emailService;

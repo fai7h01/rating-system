@@ -51,12 +51,12 @@ public class KeycloakServiceImpl implements KeycloakService {
 
         UserRepresentation keycloakUser = getUserRepresentation(dto);
 
-        try (Keycloak keycloak = getKeycloakInstance()){
+        try (Keycloak keycloak = getKeycloakInstance()) {
             RealmResource realmResource = keycloak.realm(keycloakProperties.getRealm());
             Response response = realmResource.users().create(keycloakUser);
 
             if (response.getStatus() == 201) {
-               assignClientRole(realmResource, getCreatedId(response), dto.getRole());
+                assignClientRole(realmResource, getCreatedId(response), dto.getRole());
             }
 
         } catch (Exception e) {
@@ -91,7 +91,6 @@ public class KeycloakServiceImpl implements KeycloakService {
             }
 
             usersResource.get(keycloakUser.getId()).update(keycloakUser);
-
         }
     }
 
@@ -123,7 +122,6 @@ public class KeycloakServiceImpl implements KeycloakService {
         credential.setValue(newPassword);
 
         usersResource.get(userId).resetPassword(credential);
-
     }
 
     @Override
