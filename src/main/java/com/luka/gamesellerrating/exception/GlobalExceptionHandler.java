@@ -40,6 +40,18 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler(RatingAccessDeniedException.class)
+    public ResponseEntity<ExceptionWrapper> handleAccessDeniedException(RatingAccessDeniedException exception) {
+        log.error(exception.getMessage());
+        return status(HttpStatus.FORBIDDEN)
+                .body(ExceptionWrapper.builder()
+                        .success(false)
+                        .message(exception.getMessage())
+                        .httpStatus(HttpStatus.FORBIDDEN)
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
+
     @ExceptionHandler({UserNotFoundException.class, RatingNotFoundException.class, GameObjectNotFoundException.class})
     public ResponseEntity<ExceptionWrapper> handleNotFoundExceptions(Throwable exception) {
         log.error(exception.getMessage());

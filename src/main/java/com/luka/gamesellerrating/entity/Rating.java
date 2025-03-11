@@ -34,4 +34,6 @@ public abstract class Rating extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private RatingStatus status;
 
+    private boolean isAnonymous;
+
 }

@@ -9,6 +9,7 @@ public interface RatingService {
 
     RatingDTO save(Long sellerId, RatingDTO rating);
     List<RatingDTO> findAllBySeller(Long sellerId);
-    RatingDTO findRatingBySeller(Long sellerId, Long ratingId);
+    RatingDTO findBySeller(Long sellerId, Long ratingId);
     void updateStatus(Long ratingId, RatingStatus status);
+    void delete(Long sellerId, Long ratingId);
 }

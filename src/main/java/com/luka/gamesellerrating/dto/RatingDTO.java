@@ -30,4 +30,6 @@ public class RatingDTO {
     private AnonymousUserDTO anonymousAuthor;
     @JsonProperty(access = READ_ONLY)
     private RatingStatus status = RatingStatus.PENDING;
+    @JsonProperty(access = READ_ONLY)
+    private boolean isAnonymous;
 }

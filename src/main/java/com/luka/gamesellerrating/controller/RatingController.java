@@ -7,8 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static org.springframework.http.ResponseEntity.ok;
-import static org.springframework.http.ResponseEntity.status;
+import static org.springframework.http.ResponseEntity.*;
 
 @RestController
 @RequestMapping("/api/v1/sellers/{sellerId}/ratings")
@@ -48,7 +47,14 @@ public class RatingController {
                 .success(true)
                 .code(HttpStatus.OK.value())
                 .message("Rating retrieved successfully.")
-                .data(ratingService.findRatingBySeller(sellerId, ratingId))
+                .data(ratingService.findBySeller(sellerId, ratingId))
                 .build());
+    }
+
+    @DeleteMapping("/{ratingId}")
+    public ResponseEntity<Void> deleteRating(@PathVariable("sellerId") Long sellerId,
+                                             @PathVariable("ratingId") Long ratingId) {
+        ratingService.delete(sellerId, ratingId);
+        return noContent().build();
     }
 }

@@ -2,11 +2,9 @@ package com.luka.gamesellerrating.service.impl;
 
 import com.luka.gamesellerrating.dto.AnonymousUserDTO;
 import com.luka.gamesellerrating.dto.RatingDTO;
-import com.luka.gamesellerrating.entity.AnonymousRating;
-import com.luka.gamesellerrating.entity.AuthorizedRating;
-import com.luka.gamesellerrating.entity.Comment;
-import com.luka.gamesellerrating.entity.Rating;
+import com.luka.gamesellerrating.entity.*;
 import com.luka.gamesellerrating.enums.RatingStatus;
+import com.luka.gamesellerrating.exception.RatingAccessDeniedException;
 import com.luka.gamesellerrating.exception.RatingAlreadyExistsException;
 import com.luka.gamesellerrating.exception.RatingNotFoundException;
 import com.luka.gamesellerrating.repository.RatingRepository;
@@ -64,7 +62,7 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public RatingDTO findRatingBySeller(Long sellerId, Long ratingId) {
+    public RatingDTO findBySeller(Long sellerId, Long ratingId) {
         var foundRating = ratingRepository.findBySellerIdAndId(sellerId, ratingId)
                 .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
         return mapperUtil.convert(foundRating, new RatingDTO());
@@ -76,6 +74,54 @@ public class RatingServiceImpl implements RatingService {
                 .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
         rating.setStatus(status);
         ratingRepository.save(rating);
+    }
+
+    @Override
+    public void delete(Long sellerId, Long ratingId) {
+        var rating = ratingRepository.findBySellerIdAndId(sellerId, ratingId)
+                .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
+
+        validateUserAccess(rating);
+        rating.setIsDeleted(true);
+        ratingRepository.save(rating);
+    }
+
+
+    private void validateUserAccess(Rating rating) {
+       validateUserTypeMatch(rating);
+       validateAuthorEligibility(rating);
+    }
+
+    private void validateUserTypeMatch(Rating rating) {
+        boolean isCurrentUserAnonymous = keycloakService.isUserAnonymous();
+        if (isCurrentUserAnonymous != rating.isAnonymous()) {
+            throw new RatingAccessDeniedException("Only the author can manage their own rating");
+        }
+    }
+
+    private void validateAuthorEligibility(Rating rating) {
+        boolean isCurrentUserAnonymous = keycloakService.isUserAnonymous();
+        boolean isEligible = isCurrentUserAnonymous
+                ? isAnonymousUserEligible(rating.getId())
+                : isAuthorizedUserEligible(rating.getId());
+
+        if (!isEligible) {
+            throw new RatingAccessDeniedException("Only the author can manage their own rating");
+        }
+    }
+
+    private boolean isAnonymousUserEligible(Long ratingId) {
+        String currentFingerprint = requestUtil.generateDeviceFingerprint();
+        var anonymousAuthor = ratingRepository.findAnonymousAuthor(ratingId);
+        return anonymousAuthor != null &&
+                anonymousAuthor.getIdentifier().equals(currentFingerprint);
+    }
+
+    private boolean isAuthorizedUserEligible(Long ratingId) {
+        var currentUser = keycloakService.getLoggedInUser();
+        var authorizedAuthor = ratingRepository.findAuthorizedAuthor(ratingId);
+        return authorizedAuthor != null &&
+                authorizedAuthor.getId().equals(currentUser.getId());
     }
 
     private <T extends Rating> RatingDTO persistRating(RatingDTO rating, T targetEntity) {
@@ -91,6 +137,7 @@ public class RatingServiceImpl implements RatingService {
         checkDuplicateAnonymousRating(rating.getSeller().getId(), identifier);
         var anonymousUser = getOrCreateAnonymousUser(identifier);
         rating.setAnonymousAuthor(anonymousUser);
+        rating.setAnonymous(true);
         return rating;
     }
 
