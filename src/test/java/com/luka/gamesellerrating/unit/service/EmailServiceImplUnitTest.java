@@ -1,6 +1,6 @@
 package com.luka.gamesellerrating.unit.service;
 
-import com.luka.gamesellerrating.dto.Token;
+import com.luka.gamesellerrating.dto.TokenDTO;
 import com.luka.gamesellerrating.dto.UserDTO;
 import com.luka.gamesellerrating.enums.TokenType;
 import com.luka.gamesellerrating.service.TokenService;
@@ -43,10 +43,10 @@ public class EmailServiceImplUnitTest {
         userDTO.setLastName("Doe");
         when(userService.findByEmail(any())).thenReturn(userDTO);
 
-        Token token = new Token();
-        token.setToken("dummyToken");
-        token.setExpiryDate(LocalDate.now().plusDays(1));
-        when(tokenService.generateToken(any(), eq(TokenType.VERIFICATION))).thenReturn(token);
+        TokenDTO tokenDTO = new TokenDTO();
+        tokenDTO.setToken("dummyToken");
+        tokenDTO.setExpiryDate(LocalDate.now().plusDays(1));
+        when(tokenService.generateToken(any(), eq(TokenType.VERIFICATION))).thenReturn(tokenDTO);
     }
 
     @Test

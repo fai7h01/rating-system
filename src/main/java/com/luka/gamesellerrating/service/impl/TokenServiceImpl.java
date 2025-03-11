@@ -1,6 +1,6 @@
 package com.luka.gamesellerrating.service.impl;
 
-import com.luka.gamesellerrating.dto.Token;
+import com.luka.gamesellerrating.dto.TokenDTO;
 import com.luka.gamesellerrating.enums.TokenType;
 import com.luka.gamesellerrating.exception.InvalidTokenException;
 import com.luka.gamesellerrating.service.TokenService;
@@ -14,35 +14,35 @@ import org.springframework.util.StringUtils;
 @Service
 public class TokenServiceImpl implements TokenService {
 
-    private final RedisTemplate<String, Token> redisTemplate;
+    private final RedisTemplate<String, TokenDTO> redisTemplate;
 
-    public TokenServiceImpl(RedisTemplate<String, Token> redisTemplate) {
+    public TokenServiceImpl(RedisTemplate<String, TokenDTO> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
     @Override
     @Transactional
-    public Token generateToken(String email, TokenType tokenType) {
+    public TokenDTO generateToken(String email, TokenType tokenType) {
         validateEmail(email);
-        Token token = Token.create(email, tokenType);
-        storeTokenInCache(token, tokenType);
-        log.debug("Generated {} token for email: {}", tokenType, email);
-        return token;
+        TokenDTO tokenDTO = TokenDTO.create(email, tokenType);
+        storeTokenInCache(tokenDTO, tokenType);
+        log.debug("Generated {} tokenDTO for email: {}", tokenType, email);
+        return tokenDTO;
     }
 
     @Override
     public void validateToken(String email, String tokenVal, TokenType tokenType) {
         validateTokenRequest(email, tokenVal);
-        Token storedToken = getStoredTokenFromCache(email, tokenType);
-        validateStoredToken(storedToken, tokenVal);
+        TokenDTO storedTokenDTO = getStoredTokenFromCache(email, tokenType);
+        validateStoredToken(storedTokenDTO, tokenVal);
         removeTokenFromCache(email, tokenType);
-        log.debug("Token validated and removed for email: {}", email);
+        log.debug("TokenDTO validated and removed for email: {}", email);
     }
 
-    private void storeTokenInCache(Token token, TokenType type) {
-        String key = buildKey(token.getEmail(), type);
+    private void storeTokenInCache(TokenDTO tokenDTO, TokenType type) {
+        String key = buildKey(tokenDTO.getEmail(), type);
         redisTemplate.delete(key);
-        redisTemplate.opsForValue().set(key, token, type.getDuration());
+        redisTemplate.opsForValue().set(key, tokenDTO, type.getDuration());
     }
 
     private void validateTokenRequest(String email, String tokenValue) {
@@ -51,15 +51,15 @@ public class TokenServiceImpl implements TokenService {
         }
     }
 
-    private void validateStoredToken(Token token, String tokenValue) {
-        if (token == null) {
-            throw new InvalidTokenException("Token not found");
+    private void validateStoredToken(TokenDTO tokenDTO, String tokenValue) {
+        if (tokenDTO == null) {
+            throw new InvalidTokenException("TokenDTO not found");
         }
-        if (!token.isValid()) {
-            throw new InvalidTokenException("Token has expired");
+        if (!tokenDTO.isValid()) {
+            throw new InvalidTokenException("TokenDTO has expired");
         }
-        if (!token.getToken().equals(tokenValue)) {
-            throw new InvalidTokenException("Invalid token");
+        if (!tokenDTO.getToken().equals(tokenValue)) {
+            throw new InvalidTokenException("Invalid tokenDTO");
         }
     }
 
@@ -69,7 +69,7 @@ public class TokenServiceImpl implements TokenService {
         }
     }
 
-    private Token getStoredTokenFromCache(String email, TokenType type) {
+    private TokenDTO getStoredTokenFromCache(String email, TokenType type) {
         return redisTemplate.opsForValue().get(buildKey(email, type));
     }
 

@@ -58,9 +58,8 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public List<RatingDTO> findAllBySeller(Long sellerId) {
-        return ratingRepository.findAllBySellerId(sellerId)
-                .stream()
-                .map(rating -> mapperUtil.convert(rating, new RatingDTO()))
+        return ratingRepository.findAllBySellerId(sellerId).stream()
+                .map(mapperUtil.convertTo(RatingDTO.class))
                 .toList();
     }
 

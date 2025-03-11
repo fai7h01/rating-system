@@ -13,22 +13,22 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Token {
+public class TokenDTO {
 
     private String token;
     private String email;
     private LocalDate expiryDate;
     private TokenType tokenType;
 
-    private Token(String email, TokenType type) {
+    private TokenDTO(String email, TokenType type) {
         this.email = email;
         this.tokenType = type;
         this.token = UUID.randomUUID().toString();
         this.expiryDate = LocalDate.now().plusDays(type.getDuration().toDays());
     }
 
-    public static Token create(String email, TokenType type){
-        return new Token(email, type);
+    public static TokenDTO create(String email, TokenType type){
+        return new TokenDTO(email, type);
     }
 
     public boolean isValid() {

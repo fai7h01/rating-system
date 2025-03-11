@@ -49,9 +49,8 @@ public class GameObjectServiceImpl implements GameObjectService {
 
     @Override
     public List<GameObjectDTO> findAll() {
-        return gameObjectRepository.findAll()
-                .stream()
-                .map(gameObject -> mapperUtil.convert(gameObject, new GameObjectDTO()))
+        return gameObjectRepository.findAll().stream()
+                .map(mapperUtil.convertTo(GameObjectDTO.class))
                 .toList();
     }
 

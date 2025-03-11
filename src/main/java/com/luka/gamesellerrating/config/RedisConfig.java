@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.luka.gamesellerrating.dto.Token;
+import com.luka.gamesellerrating.dto.TokenDTO;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -16,8 +16,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
     @Bean
-    public RedisTemplate<String, Token> redisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, Token> template = new RedisTemplate<>();
+    public RedisTemplate<String, TokenDTO> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, TokenDTO> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
         ObjectMapper objectMapper = new ObjectMapper();

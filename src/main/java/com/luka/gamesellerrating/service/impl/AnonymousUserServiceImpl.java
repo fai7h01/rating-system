@@ -7,6 +7,7 @@ import com.luka.gamesellerrating.service.AnonymousUserService;
 import com.luka.gamesellerrating.util.MapperUtil;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,6 +21,13 @@ public class AnonymousUserServiceImpl implements AnonymousUserService {
         this.mapperUtil = mapperUtil;
     }
 
+
+    @Override
+    public List<AnonymousUserDTO> findAll() {
+        return anonymousUserRepository.findAll().stream()
+                .map(mapperUtil.convertTo(AnonymousUserDTO.class))
+                .toList();
+    }
 
     @Override
     public AnonymousUserDTO save(String identifier) {

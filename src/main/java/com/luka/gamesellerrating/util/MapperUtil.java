@@ -9,6 +9,8 @@ import org.modelmapper.PropertyMap;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @Component
 public class MapperUtil {
@@ -37,4 +39,8 @@ public class MapperUtil {
         return modelMapper.map(source, (Type) destination.getClass());
     }
 
+
+    public <S, D> Function<S, D> convertTo(Class<D> destinationType) {
+        return source -> modelMapper.map(source, destinationType);
+    }
 }

@@ -1,6 +1,6 @@
 package com.luka.gamesellerrating.service.impl;
 
-import com.luka.gamesellerrating.dto.Token;
+import com.luka.gamesellerrating.dto.TokenDTO;
 import com.luka.gamesellerrating.dto.UserDTO;
 import com.luka.gamesellerrating.enums.TokenType;
 import com.luka.gamesellerrating.service.EmailService;
@@ -50,17 +50,17 @@ public class EmailServiceImpl implements EmailService {
 
     private SimpleMailMessage createVerificationEmail(String email) {
         String fullName = findUserFullName(email);
-        Token token = tokenService.generateToken(email, TokenType.VERIFICATION);
+        TokenDTO tokenDTO = tokenService.generateToken(email, TokenType.VERIFICATION);
         String subject = "Email Verification";
-        String message = createVerificationEmailMessage(email, fullName, token.getToken(), token.getExpiryDate());
+        String message = createVerificationEmailMessage(email, fullName, tokenDTO.getToken(), tokenDTO.getExpiryDate());
         return buildMailMessage(email, subject, message);
     }
 
     private SimpleMailMessage createPasswordResetEmail(String email) {
         String fullName = findUserFullName(email);
-        Token token = tokenService.generateToken(email, TokenType.RESET_PASSWORD);
+        TokenDTO tokenDTO = tokenService.generateToken(email, TokenType.RESET_PASSWORD);
         String subject = "Reset Password";
-        String message = createResetPasswordEmailMessage(email, fullName, token.getToken(), token.getExpiryDate());
+        String message = createResetPasswordEmailMessage(email, fullName, tokenDTO.getToken(), tokenDTO.getExpiryDate());
         return buildMailMessage(email, subject, message);
 
     }
