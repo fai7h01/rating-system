@@ -40,7 +40,6 @@ public class RatingServiceImpl implements RatingService {
         this.mapperUtil = mapperUtil;
     }
 
-
     @Override
     @Transactional
     public RatingDTO save(Long sellerId, RatingDTO rating) {
@@ -61,10 +60,9 @@ public class RatingServiceImpl implements RatingService {
                 .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
         validateUserAccess(ratingEntity);
         ratingEntity.setRating(ratingDTO.getRating());
-        ratingDTO.getComment().setId(ratingEntity.getComment().getId());
-        var updatedComment = commentService.save(ratingDTO.getComment());
-        ratingEntity.setComment(mapperUtil.convert(updatedComment, new Comment()));
-        return mapperUtil.convert(ratingRepository.save(ratingEntity), new RatingDTO());
+        ratingEntity.getComment().setMessage(ratingDTO.getComment().getMessage());
+        var updatedRating = ratingRepository.save(ratingEntity);
+        return mapperUtil.convert(updatedRating, new RatingDTO());
     }
 
     @Override
@@ -93,12 +91,10 @@ public class RatingServiceImpl implements RatingService {
     public void delete(Long sellerId, Long ratingId) {
         var rating = ratingRepository.findBySellerIdAndId(sellerId, ratingId)
                 .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
-
         validateUserAccess(rating);
         rating.setIsDeleted(true);
         ratingRepository.save(rating);
     }
-
 
     private void validateUserAccess(Rating rating) {
        validateUserTypeMatch(rating);
@@ -117,7 +113,6 @@ public class RatingServiceImpl implements RatingService {
         boolean isEligible = isCurrentUserAnonymous
                 ? isAnonymousUserEligible(rating.getId())
                 : isAuthorizedUserEligible(rating.getId());
-
         if (!isEligible) {
             throw new RatingAccessDeniedException("Only the author can manage their own rating");
         }
@@ -126,15 +121,13 @@ public class RatingServiceImpl implements RatingService {
     private boolean isAnonymousUserEligible(Long ratingId) {
         String currentFingerprint = requestUtil.generateDeviceFingerprint();
         var anonymousAuthor = ratingRepository.findAnonymousAuthor(ratingId);
-        return anonymousAuthor != null &&
-                anonymousAuthor.getIdentifier().equals(currentFingerprint);
+        return anonymousAuthor.map(user -> user.getIdentifier().equals(currentFingerprint)).orElse(false);
     }
 
     private boolean isAuthorizedUserEligible(Long ratingId) {
         var currentUser = keycloakService.getLoggedInUser();
         var authorizedAuthor = ratingRepository.findAuthorizedAuthor(ratingId);
-        return authorizedAuthor != null &&
-                authorizedAuthor.getId().equals(currentUser.getId());
+        return authorizedAuthor.map(user -> user.getId().equals(currentUser.getId())).orElse(false);
     }
 
     private <T extends Rating> RatingDTO persistRating(RatingDTO rating, T targetEntity) {
@@ -145,7 +138,6 @@ public class RatingServiceImpl implements RatingService {
         return mapperUtil.convert(savedRating, new RatingDTO());
     }
 
-
     private RatingDTO prepareAnonymousRating(RatingDTO rating) {
         var identifier = requestUtil.generateDeviceFingerprint();
         checkDuplicateAnonymousRating(rating.getSeller().getId(), identifier);
@@ -154,7 +146,6 @@ public class RatingServiceImpl implements RatingService {
         rating.setAnonymous(true);
         return rating;
     }
-
 
     private RatingDTO prepareAuthorizedRating(RatingDTO rating) {
         var loggedInUser = keycloakService.getLoggedInUser();
@@ -179,5 +170,4 @@ public class RatingServiceImpl implements RatingService {
         return anonymousUserService.findByIdentifier(identifier)
                 .orElseGet(() -> anonymousUserService.save(identifier));
     }
-
 }

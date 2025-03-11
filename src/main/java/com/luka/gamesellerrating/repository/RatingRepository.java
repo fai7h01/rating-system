@@ -35,7 +35,7 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
         JOIN users u ON ar.authorized_author_id = u.id
         WHERE r.id = :ratingId
         """, nativeQuery = true)
-    User findAuthorizedAuthor(@Param("ratingId") Long ratingId);
+    Optional<User> findAuthorizedAuthor(@Param("ratingId") Long ratingId);
 
     @Query(value = """
         SELECT au.*
@@ -44,5 +44,5 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
         JOIN anonymous_users au ON ar.anonymous_author_id = au.id
         WHERE r.id = :ratingId
         """, nativeQuery = true)
-    AnonymousUser findAnonymousAuthor(@Param("ratingId") Long ratingId);
+    Optional<AnonymousUser> findAnonymousAuthor(@Param("ratingId") Long ratingId);
 }
