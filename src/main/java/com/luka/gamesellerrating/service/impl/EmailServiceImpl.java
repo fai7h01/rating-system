@@ -24,7 +24,6 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-
     private final JavaMailSender mailSender;
     private final TokenService tokenService;
     private final UserService userService;
@@ -42,8 +41,11 @@ public class EmailServiceImpl implements EmailService {
         this.sendEmail(simpleMailMessage);
     }
 
-    private void sendEmail(SimpleMailMessage simpleMailMessage) {
-        mailSender.send(simpleMailMessage);
+    @Override
+    @Async("asyncTaskExecutor")
+    public void sendPasswordResetEmail(String email) {
+        SimpleMailMessage simpleMailMessage = createPasswordResetEmail(email);
+        this.sendEmail(simpleMailMessage);
     }
 
     private SimpleMailMessage createVerificationEmail(String email) {
@@ -52,6 +54,29 @@ public class EmailServiceImpl implements EmailService {
         String subject = "Email Verification";
         String message = createVerificationEmailMessage(email, fullName, token.getToken(), token.getExpiryDate());
         return buildMailMessage(email, subject, message);
+    }
+
+    private SimpleMailMessage createPasswordResetEmail(String email) {
+        String fullName = findUserFullName(email);
+        Token token = tokenService.generateToken(email, TokenType.RESET_PASSWORD);
+        String subject = "Reset Password";
+        String message = createResetPasswordEmailMessage(email, fullName, token.getToken(), token.getExpiryDate());
+        return buildMailMessage(email, subject, message);
+
+    }
+
+    private String createVerificationEmailMessage(String email, String fullName, String token, LocalDate expiryDate) {
+        String companyName = "Game items Marketplace";
+        String link = BASE_URL + "/api/v1/auth/confirmation?email=" + email + "&token=" + token;
+        String tokenExpiryDate = expiryDate.toString();
+        return createVerificationEmailText(fullName, companyName, link, tokenExpiryDate);
+    }
+
+    private String createResetPasswordEmailMessage(String email, String fullName, String token, LocalDate expiryDate) {
+        String companyName = "Game items Marketplace";
+        String link = BASE_URL + "/api/v1/auth/new-password?email=" + email + "&token=" + token;
+        String tokenExpiryDate = expiryDate.toString();
+        return createResetPasswordEmailText(fullName, companyName, link, tokenExpiryDate);
     }
 
     private SimpleMailMessage buildMailMessage(String to, String subject, String message) {
@@ -68,13 +93,8 @@ public class EmailServiceImpl implements EmailService {
         return dto.getFirstName() + " " + dto.getLastName();
     }
 
-    private String createVerificationEmailMessage(String email, String fullName, String token, LocalDate expiryDate) {
-
-        String companyName = "Marketplace";
-        String link = BASE_URL + "/api/v1/auth?email=" + email + "&token=" + token;
-        String tokenExpiryDate = expiryDate.toString();
-
-        return createVerificationEmailText(fullName, companyName, link, tokenExpiryDate);
+    private void sendEmail(SimpleMailMessage simpleMailMessage) {
+        mailSender.send(simpleMailMessage);
     }
 
     private String createVerificationEmailText(String fullName, String companyName, String link, String tokenExpiryDate) {
@@ -91,5 +111,21 @@ public class EmailServiceImpl implements EmailService {
                 
                 For security reasons, this confirmation link will expire at %s. If the link expired, you will need to request a new confirmation.
                 """, fullName, companyName, link, tokenExpiryDate);
+    }
+
+    private String createResetPasswordEmailText(String fullName, String companyName, String link, String tokenExpiryDate) {
+        return String.format("""
+            Dear %s,
+            
+            We received a request to reset your password for your %s account.
+            
+            To reset your password, please click the link below:
+            
+            %s
+            
+            If you did not request a password reset, you can safely ignore this email.
+            
+            This link will expire at %s. If the link expires, please submit a new password reset request.
+            """, fullName, companyName, link, tokenExpiryDate);
     }
 }

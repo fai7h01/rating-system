@@ -26,7 +26,7 @@ public class TokenServiceImpl implements TokenService {
         validateEmail(email);
 
         Token token = Token.create(email, tokenType);
-        storeToken(token, tokenType);
+        storeTokenInCache(token, tokenType);
 
         log.debug("Generated {} token for email: {}", tokenType, email);
         return token;
@@ -36,14 +36,14 @@ public class TokenServiceImpl implements TokenService {
     public void validateToken(String email, String tokenVal, TokenType tokenType) {
         validateTokenRequest(email, tokenVal);
 
-        Token storedToken = getStoredToken(email, tokenType);
+        Token storedToken = getStoredTokenFromCache(email, tokenType);
         validateStoredToken(storedToken, tokenVal);
 
-        removeToken(email, tokenType);
+        removeTokenFromCache(email, tokenType);
         log.debug("Token validated and removed for email: {}", email);
     }
 
-    private void storeToken(Token token, TokenType type) {
+    private void storeTokenInCache(Token token, TokenType type) {
         String key = buildKey(token.getEmail(), type);
         redisTemplate.delete(key);
         redisTemplate.opsForValue().set(key, token, type.getDuration());
@@ -73,11 +73,11 @@ public class TokenServiceImpl implements TokenService {
         }
     }
 
-    private Token getStoredToken(String email, TokenType type) {
+    private Token getStoredTokenFromCache(String email, TokenType type) {
         return redisTemplate.opsForValue().get(buildKey(email, type));
     }
 
-    private void removeToken(String email, TokenType type) {
+    private void removeTokenFromCache(String email, TokenType type) {
         redisTemplate.delete(buildKey(email, type));
     }
 
