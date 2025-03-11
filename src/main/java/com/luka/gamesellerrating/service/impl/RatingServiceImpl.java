@@ -55,6 +55,18 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
+    public RatingDTO update(Long sellerId, Long ratingId, RatingDTO ratingDTO) {
+        var ratingEntity = ratingRepository.findBySellerIdAndId(sellerId, ratingId)
+                .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
+        validateUserAccess(ratingEntity);
+        ratingEntity.setRating(ratingDTO.getRating());
+        ratingDTO.getComment().setId(ratingEntity.getComment().getId());
+        var updatedComment = commentService.save(ratingDTO.getComment());
+        ratingEntity.setComment(mapperUtil.convert(updatedComment, new Comment()));
+        return mapperUtil.convert(ratingRepository.save(ratingEntity), new RatingDTO());
+    }
+
+    @Override
     public List<RatingDTO> findAllBySeller(Long sellerId) {
         return ratingRepository.findAllBySellerId(sellerId).stream()
                 .map(mapperUtil.convertTo(RatingDTO.class))
@@ -131,6 +143,7 @@ public class RatingServiceImpl implements RatingService {
         var savedRating = ratingRepository.save(ratingToSave);
         return mapperUtil.convert(savedRating, new RatingDTO());
     }
+
 
     private RatingDTO prepareAnonymousRating(RatingDTO rating) {
         var identifier = requestUtil.generateDeviceFingerprint();

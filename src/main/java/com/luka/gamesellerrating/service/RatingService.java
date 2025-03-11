@@ -8,6 +8,7 @@ import java.util.List;
 public interface RatingService {
 
     RatingDTO save(Long sellerId, RatingDTO rating);
+    RatingDTO update(Long sellerId, Long ratingId, RatingDTO ratingDTO);
     List<RatingDTO> findAllBySeller(Long sellerId);
     RatingDTO findBySeller(Long sellerId, Long ratingId);
     void updateStatus(Long ratingId, RatingStatus status);

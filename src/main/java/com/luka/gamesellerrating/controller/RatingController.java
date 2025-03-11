@@ -57,4 +57,17 @@ public class RatingController {
         ratingService.delete(sellerId, ratingId);
         return noContent().build();
     }
+
+    @PutMapping("/{ratingId}")
+    public ResponseEntity<ResponseWrapper> updateRating(@PathVariable("sellerId") Long sellerId,
+                                                        @PathVariable("ratingId") Long ratingId,
+                                                        @RequestBody RatingDTO ratingDTO) {
+        var updatedRating = ratingService.update(sellerId, ratingId, ratingDTO);
+        return ok(ResponseWrapper.builder()
+                .success(true)
+                .code(HttpStatus.OK.value())
+                .message("Rating updated successfully.")
+                .data(updatedRating)
+                .build());
+    }
 }

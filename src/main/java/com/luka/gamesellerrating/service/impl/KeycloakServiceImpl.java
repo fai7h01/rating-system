@@ -129,7 +129,6 @@ public class KeycloakServiceImpl implements KeycloakService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken jwtAuth) {
             Jwt jwt = jwtAuth.getToken();
-            log.info("jwt: {}", jwt.getTokenValue());
             String username = jwt.getClaimAsString("email");
             if (username != null) {
                 return userService.findByEmail(username);
