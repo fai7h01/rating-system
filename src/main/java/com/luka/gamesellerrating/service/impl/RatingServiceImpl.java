@@ -55,6 +55,7 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
+    @Transactional
     public RatingDTO update(Long sellerId, Long ratingId, RatingDTO ratingDTO) {
         var ratingEntity = ratingRepository.findBySellerIdAndId(sellerId, ratingId)
                 .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
