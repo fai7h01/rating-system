@@ -2,6 +2,7 @@ package com.luka.gamesellerrating.service.impl;
 
 import com.luka.gamesellerrating.dto.AnonymousUserDTO;
 import com.luka.gamesellerrating.dto.RatingDTO;
+import com.luka.gamesellerrating.dto.UserDTO;
 import com.luka.gamesellerrating.entity.*;
 import com.luka.gamesellerrating.enums.RatingStatus;
 import com.luka.gamesellerrating.exception.RatingAccessDeniedException;
@@ -15,7 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
