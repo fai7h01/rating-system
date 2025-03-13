@@ -17,4 +17,5 @@ public interface UserService {
     void updateStatus(Long id, UserStatus status);
     void verifyEmail(String email, String token);
     void resetPassword(String email, String token, ResetPasswordDTO newPassword);
+    void updateOverallRating(Long id);
 }

@@ -33,7 +33,6 @@ public class User extends BaseEntity{
     private Role role;
     @Enumerated(EnumType.STRING)
     private UserStatus status;
-    @Column(precision = 3, scale = 2)
     private BigDecimal overallRating;
 
 }

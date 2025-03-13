@@ -1,6 +1,7 @@
 package com.luka.gamesellerrating.repository;
 
 import com.luka.gamesellerrating.entity.Rating;
+import com.luka.gamesellerrating.enums.RatingValue;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +20,7 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     boolean existsAnonymousBySellerIdAndAuthorId(@Param("sellerId") Long sellerId, @Param("authorId") String authorId);
 
     Optional<Rating> findBySellerIdAndId(Long sellerId, Long ratingId);
+
+    @Query("SELECT r.rating FROM Rating r WHERE r.seller.id = :sellerId AND r.status = 'APPROVED'")
+    List<RatingValue> findAllRatingValueBySeller(@Param("sellerId") Long sellerId);
 }
