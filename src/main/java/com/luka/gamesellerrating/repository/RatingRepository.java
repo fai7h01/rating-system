@@ -25,6 +25,6 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     @Query("SELECT r.author FROM Rating r WHERE r.isAnonymous = false AND r.id = :ratingId")
     Optional<User> findAuthorizedAuthor(@Param("ratingId") Long ratingId);
 
-    @Query("SELECT r.author FROM Rating r WHERE r.isAnonymous = true AND r.id = :ratingId")
+    @Query("SELECT r.anonymousAuthor FROM Rating r WHERE r.isAnonymous = true AND r.id = :ratingId")
     Optional<AnonymousUser> findAnonymousAuthor(@Param("ratingId") Long ratingId);
 }

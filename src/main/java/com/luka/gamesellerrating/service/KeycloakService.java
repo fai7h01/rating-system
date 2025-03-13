@@ -6,8 +6,6 @@ public interface KeycloakService {
 
     void userCreate(UserDTO dto);
     void userUpdate(UserDTO dto);
-    UserDTO getLoggedInUser();
-    boolean isUserAnonymous();
     void verifyUserEmail(String email, String token);
 
 }

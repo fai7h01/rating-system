@@ -6,8 +6,8 @@ import com.luka.gamesellerrating.entity.GameObject;
 import com.luka.gamesellerrating.exception.GameObjectAlreadyExistsException;
 import com.luka.gamesellerrating.exception.GameObjectNotFoundException;
 import com.luka.gamesellerrating.repository.GameObjectRepository;
+import com.luka.gamesellerrating.service.AuthenticationService;
 import com.luka.gamesellerrating.service.GameObjectService;
-import com.luka.gamesellerrating.service.KeycloakService;
 import com.luka.gamesellerrating.util.MapperUtil;
 import org.springframework.stereotype.Service;
 
@@ -17,12 +17,12 @@ import java.util.List;
 public class GameObjectServiceImpl implements GameObjectService {
 
     private final GameObjectRepository gameObjectRepository;
-    private final KeycloakService keycloakService;
+    private final AuthenticationService authenticationService;
     private final MapperUtil mapperUtil;
 
-    public GameObjectServiceImpl(GameObjectRepository gameObjectRepository, KeycloakService keycloakService, MapperUtil mapperUtil) {
+    public GameObjectServiceImpl(GameObjectRepository gameObjectRepository, AuthenticationService authenticationService, MapperUtil mapperUtil) {
         this.gameObjectRepository = gameObjectRepository;
-        this.keycloakService = keycloakService;
+        this.authenticationService = authenticationService;
         this.mapperUtil = mapperUtil;
     }
 
@@ -63,6 +63,6 @@ public class GameObjectServiceImpl implements GameObjectService {
     }
 
     private UserDTO getLoggedInUser() {
-        return keycloakService.getLoggedInUser();
+        return authenticationService.getLoggedInUser();
     }
 }

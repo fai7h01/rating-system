@@ -36,12 +36,10 @@ import static org.keycloak.admin.client.CreatedResponseUtil.getCreatedId;
 public class KeycloakServiceImpl implements KeycloakService {
 
     private final KeycloakProperties keycloakProperties;
-    private final UserService userService;
     private final TokenService tokenService;
 
-    public KeycloakServiceImpl(KeycloakProperties keycloakProperties, UserService userService, TokenService tokenService) {
+    public KeycloakServiceImpl(KeycloakProperties keycloakProperties, TokenService tokenService) {
         this.keycloakProperties = keycloakProperties;
-        this.userService = userService;
         this.tokenService = tokenService;
     }
 
@@ -122,27 +120,6 @@ public class KeycloakServiceImpl implements KeycloakService {
         credential.setValue(newPassword);
 
         usersResource.get(userId).resetPassword(credential);
-    }
-
-    @Override
-    public UserDTO getLoggedInUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof JwtAuthenticationToken jwtAuth) {
-            Jwt jwt = jwtAuth.getToken();
-            String username = jwt.getClaimAsString("email");
-            if (username != null) {
-                return userService.findByEmail(username);
-            }
-        }
-        throw new IllegalStateException("No authenticated user found");
-    }
-
-    @Override
-    public boolean isUserAnonymous() {
-        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
-                .map(auth -> auth.getAuthorities().stream()
-                        .anyMatch(a -> "ROLE_ANONYMOUS".equals(a.getAuthority())))
-                .orElse(true);
     }
 
     @Override

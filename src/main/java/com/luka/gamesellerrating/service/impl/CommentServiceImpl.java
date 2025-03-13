@@ -18,7 +18,6 @@ public class CommentServiceImpl implements CommentService {
         this.mapperUtil = mapperUtil;
     }
 
-
     @Override
     public CommentDTO save(CommentDTO comment) {
         var commentEntity = mapperUtil.convert(comment, new Comment());

@@ -1,17 +1,14 @@
 package com.luka.gamesellerrating.service.impl;
 
-import com.luka.gamesellerrating.dto.AnonymousUserDTO;
 import com.luka.gamesellerrating.dto.RatingDTO;
-import com.luka.gamesellerrating.dto.UserDTO;
 import com.luka.gamesellerrating.entity.*;
 import com.luka.gamesellerrating.enums.RatingStatus;
-import com.luka.gamesellerrating.exception.RatingAccessDeniedException;
-import com.luka.gamesellerrating.exception.RatingAlreadyExistsException;
 import com.luka.gamesellerrating.exception.RatingNotFoundException;
 import com.luka.gamesellerrating.repository.RatingRepository;
 import com.luka.gamesellerrating.service.*;
+import com.luka.gamesellerrating.service.helper.RatingFactory;
+import com.luka.gamesellerrating.service.helper.RatingValidator;
 import com.luka.gamesellerrating.util.MapperUtil;
-import com.luka.gamesellerrating.util.RequestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,47 +20,35 @@ import java.util.List;
 public class RatingServiceImpl implements RatingService {
 
     private final RatingRepository ratingRepository;
-    private final AnonymousUserService anonymousUserService;
-    private final UserService userService;
-    private final KeycloakService keycloakService;
-    private final CommentService commentService;
-    private final RequestUtil requestUtil;
     private final MapperUtil mapperUtil;
+    private final RatingFactory ratingFactory;
+    private final RatingValidator ratingValidator;
 
-    public RatingServiceImpl(RatingRepository ratingRepository, AnonymousUserService anonymousUserService, UserService userService,
-                             KeycloakService keycloakService, CommentService commentService, RequestUtil requestUtil, MapperUtil mapperUtil) {
+    public RatingServiceImpl(RatingRepository ratingRepository, MapperUtil mapperUtil, RatingFactory ratingFactory, RatingValidator ratingValidator) {
         this.ratingRepository = ratingRepository;
-        this.anonymousUserService = anonymousUserService;
-        this.userService = userService;
-        this.keycloakService = keycloakService;
-        this.commentService = commentService;
-        this.requestUtil = requestUtil;
         this.mapperUtil = mapperUtil;
+        this.ratingFactory = ratingFactory;
+        this.ratingValidator = ratingValidator;
     }
 
     @Override
     @Transactional
     public RatingDTO save(Long sellerId, RatingDTO rating) {
-        var seller = userService.findById(sellerId);
-        rating.setSeller(seller);
-        boolean isUserAnonymous = keycloakService.isUserAnonymous();
-        var preparedRating = isUserAnonymous
-                ? prepareAnonymousRating(rating)
-                : prepareAuthorizedRating(rating);
-        return persistRating(preparedRating);
+        var preparedRating = ratingFactory.createRating(sellerId, rating);
+        ratingValidator.validateDuplicateRating(preparedRating);
+        var savedRating = ratingRepository.save(preparedRating);
+        return mapperUtil.convert(savedRating, new RatingDTO());
     }
 
     @Override
     @Transactional
     public RatingDTO update(Long sellerId, Long ratingId, RatingDTO ratingDTO) {
-        var ratingEntity = ratingRepository.findBySellerIdAndId(sellerId, ratingId)
-                .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
-        validateUserAccess(ratingEntity);
-        ratingEntity.setRating(ratingDTO.getRating());
-        ratingEntity.getComment().setMessage(ratingDTO.getComment().getMessage());
-        var updatedRating = ratingRepository.save(ratingEntity);
-        return mapperUtil.convert(updatedRating, new RatingDTO());
+        var ratingEntity = findRatingBySellerAndId(sellerId, ratingId);
+        ratingValidator.validateUserAccess(ratingEntity);
+        updateRatingFields(ratingEntity, ratingDTO);
+        return mapperUtil.convert(ratingRepository.save(ratingEntity), new RatingDTO());
     }
+
 
     @Override
     public List<RatingDTO> findAllBySeller(Long sellerId) {
@@ -74,8 +59,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingDTO findBySeller(Long sellerId, Long ratingId) {
-        var foundRating = ratingRepository.findBySellerIdAndId(sellerId, ratingId)
-                .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
+        var foundRating = findRatingBySellerAndId(sellerId, ratingId);
         return mapperUtil.convert(foundRating, new RatingDTO());
     }
 
@@ -91,83 +75,19 @@ public class RatingServiceImpl implements RatingService {
     public void delete(Long sellerId, Long ratingId) {
         var rating = ratingRepository.findBySellerIdAndId(sellerId, ratingId)
                 .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
-        validateUserAccess(rating);
+        ratingValidator.validateUserAccess(rating);
         rating.setIsDeleted(true);
         ratingRepository.save(rating);
     }
 
-    private void validateUserAccess(Rating rating) {
-       validateUserTypeMatch(rating);
-       validateAuthorEligibility(rating);
+    private Rating findRatingBySellerAndId(Long sellerId, Long ratingId) {
+        return ratingRepository.findBySellerIdAndId(sellerId, ratingId)
+                .orElseThrow(() -> new RatingNotFoundException("Rating not found"));
     }
 
-    private void validateUserTypeMatch(Rating rating) {
-        boolean isCurrentUserAnonymous = keycloakService.isUserAnonymous();
-        if (isCurrentUserAnonymous != rating.isAnonymous()) {
-            throw new RatingAccessDeniedException("Only the author can manage their own rating");
-        }
+    private void updateRatingFields(Rating entity, RatingDTO dto) {
+        entity.setRating(dto.getRating());
+        entity.getComment().setMessage(dto.getComment().getMessage());
     }
 
-    private void validateAuthorEligibility(Rating rating) {
-        boolean isCurrentUserAnonymous = keycloakService.isUserAnonymous();
-        boolean isEligible = isCurrentUserAnonymous
-                ? isAnonymousUserEligible(rating.getId())
-                : isAuthorizedUserEligible(rating.getId());
-        if (!isEligible) {
-            throw new RatingAccessDeniedException("Only the author can manage their own rating");
-        }
-    }
-
-    private boolean isAnonymousUserEligible(Long ratingId) {
-        String currentFingerprint = requestUtil.generateDeviceFingerprint();
-        var anonymousAuthor = ratingRepository.findAnonymousAuthor(ratingId);
-        return anonymousAuthor.map(user -> user.getIdentifier().equals(currentFingerprint)).orElse(false);
-    }
-
-    private boolean isAuthorizedUserEligible(Long ratingId) {
-        var currentUser = keycloakService.getLoggedInUser();
-        var authorizedAuthor = ratingRepository.findAuthorizedAuthor(ratingId);
-        return authorizedAuthor.map(user -> user.getId().equals(currentUser.getId())).orElse(false);
-    }
-
-    private RatingDTO persistRating(RatingDTO rating) {
-        var ratingToSave = mapperUtil.convert(rating, new Rating());
-        var savedComment = commentService.save(rating.getComment());
-        ratingToSave.setComment(mapperUtil.convert(savedComment, new Comment()));
-        var savedRating = ratingRepository.save(ratingToSave);
-        return mapperUtil.convert(savedRating, new RatingDTO());
-    }
-
-    private RatingDTO prepareAnonymousRating(RatingDTO rating) {
-        var identifier = requestUtil.generateDeviceFingerprint();
-        checkDuplicateAnonymousRating(rating.getSeller().getId(), identifier);
-        var anonymousUser = getOrCreateAnonymousUser(identifier);
-        rating.setAnonymousAuthor(anonymousUser);
-        rating.setAnonymous(true);
-        return rating;
-    }
-
-    private RatingDTO prepareAuthorizedRating(RatingDTO rating) {
-        var loggedInUser = keycloakService.getLoggedInUser();
-        checkDuplicateAuthorizedRating(rating.getSeller().getId(), loggedInUser.getId());
-        rating.setAuthor(loggedInUser);
-        return rating;
-    }
-
-    private void checkDuplicateAnonymousRating(Long sellerId, String anonymousIdentifier) {
-        if (ratingRepository.existsAnonymousBySellerIdAndAuthorId(sellerId, anonymousIdentifier)) {
-            throw new RatingAlreadyExistsException("You have already rated this seller.");
-        }
-    }
-
-    private void checkDuplicateAuthorizedRating(Long sellerId, Long userId) {
-        if (ratingRepository.existsAuthorizedBySellerIdAndAuthorId(sellerId, userId)) {
-            throw new RatingAlreadyExistsException("You have already rated this seller.");
-        }
-    }
-
-    private AnonymousUserDTO getOrCreateAnonymousUser(String identifier) {
-        return anonymousUserService.findByIdentifier(identifier)
-                .orElseGet(() -> anonymousUserService.save(identifier));
-    }
 }

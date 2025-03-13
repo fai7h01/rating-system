@@ -13,8 +13,6 @@ import com.luka.gamesellerrating.service.KeycloakService;
 import com.luka.gamesellerrating.service.UserService;
 import com.luka.gamesellerrating.util.MapperUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,12 +101,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void resetPassword(String email, String token, ResetPasswordDTO newPassword) {
-        log.info("\n\n>>> NEW PASSWORD: {}", newPassword.getNewPassword());
         var foundUser = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
         foundUser.setPassword(newPassword.getNewPassword());
         var savedUser = userRepository.save(foundUser);
-        log.info("\n\n>>> USER ENTITY PASSWORD: {}", newPassword.getNewPassword());
         keycloakService.userUpdate(mapperUtil.convert(savedUser, new UserDTO()));
     }
 

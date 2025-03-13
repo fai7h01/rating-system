@@ -6,6 +6,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.SQLRestriction;
 
 @Getter
@@ -14,6 +15,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Entity
 @Table(name = "anonymous_users")
 @SQLRestriction("is_deleted = false")
+@ToString
 public class AnonymousUser extends BaseEntity{
 
     private String username;
