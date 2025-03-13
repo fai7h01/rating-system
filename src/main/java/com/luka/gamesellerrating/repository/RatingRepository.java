@@ -14,35 +14,17 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
 
     List<Rating> findAllBySellerId(Long sellerId);
 
-    @Query("SELECT CASE WHEN COUNT(ar) > 0 THEN true ELSE false END " +
-            "FROM AuthorizedRating ar " +
-            "WHERE ar.seller.id = :sellerId AND ar.author.id = :authorId")
-    boolean existsAuthorizedRating(@Param("sellerId") Long sellerId, @Param("authorId") Long authorId);
+    @Query("SELECT COUNT(r) > 0 FROM Rating r WHERE r.isAnonymous = false AND r.seller.id = :sellerId AND r.author.id = :authorId")
+    boolean existsAuthorizedBySellerIdAndAuthorId(@Param("sellerId") Long sellerId, @Param("authorId") Long authorId);
 
-    @Query("SELECT CASE WHEN COUNT(anr) > 0 THEN true ELSE false END " +
-            "FROM AnonymousRating anr " +
-            "WHERE anr.seller.id = :sellerId " +
-            "AND anr.anonymousAuthor.identifier = :identifier")
-    boolean existsAnonymousRating(@Param("sellerId") Long sellerId,
-                                  @Param("identifier") String sessionId);
+    @Query("SELECT COUNT(r) > 0 FROM Rating r WHERE r.isAnonymous = true AND r.seller.id = :sellerId AND r.anonymousAuthor.identifier = :authorId")
+    boolean existsAnonymousBySellerIdAndAuthorId(@Param("sellerId") Long sellerId, @Param("authorId") String authorId);
 
     Optional<Rating> findBySellerIdAndId(Long sellerId, Long ratingId);
 
-    @Query(value = """
-        SELECT u.*
-        FROM ratings r
-        JOIN authorized_ratings ar ON r.id = ar.id
-        JOIN users u ON ar.authorized_author_id = u.id
-        WHERE r.id = :ratingId
-        """, nativeQuery = true)
+    @Query("SELECT r.author FROM Rating r WHERE r.isAnonymous = false AND r.id = :ratingId")
     Optional<User> findAuthorizedAuthor(@Param("ratingId") Long ratingId);
 
-    @Query(value = """
-        SELECT au.*
-        FROM ratings r
-        JOIN anonymous_ratings ar ON r.id = ar.id
-        JOIN anonymous_users au ON ar.anonymous_author_id = au.id
-        WHERE r.id = :ratingId
-        """, nativeQuery = true)
+    @Query("SELECT r.author FROM Rating r WHERE r.isAnonymous = true AND r.id = :ratingId")
     Optional<AnonymousUser> findAnonymousAuthor(@Param("ratingId") Long ratingId);
 }

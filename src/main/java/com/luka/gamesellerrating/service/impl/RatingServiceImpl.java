@@ -16,9 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -52,8 +50,7 @@ public class RatingServiceImpl implements RatingService {
         var preparedRating = isUserAnonymous
                 ? prepareAnonymousRating(rating)
                 : prepareAuthorizedRating(rating);
-        var targetEntity = isUserAnonymous ? new AnonymousRating() : new AuthorizedRating();
-        return persistRating(preparedRating, targetEntity);
+        return persistRating(preparedRating);
     }
 
     @Override
@@ -133,8 +130,8 @@ public class RatingServiceImpl implements RatingService {
         return authorizedAuthor.map(user -> user.getId().equals(currentUser.getId())).orElse(false);
     }
 
-    private <T extends Rating> RatingDTO persistRating(RatingDTO rating, T targetEntity) {
-        var ratingToSave = mapperUtil.convert(rating, targetEntity);
+    private RatingDTO persistRating(RatingDTO rating) {
+        var ratingToSave = mapperUtil.convert(rating, new Rating());
         var savedComment = commentService.save(rating.getComment());
         ratingToSave.setComment(mapperUtil.convert(savedComment, new Comment()));
         var savedRating = ratingRepository.save(ratingToSave);
@@ -158,13 +155,13 @@ public class RatingServiceImpl implements RatingService {
     }
 
     private void checkDuplicateAnonymousRating(Long sellerId, String anonymousIdentifier) {
-        if (ratingRepository.existsAnonymousRating(sellerId, anonymousIdentifier)) {
+        if (ratingRepository.existsAnonymousBySellerIdAndAuthorId(sellerId, anonymousIdentifier)) {
             throw new RatingAlreadyExistsException("You have already rated this seller.");
         }
     }
 
     private void checkDuplicateAuthorizedRating(Long sellerId, Long userId) {
-        if (ratingRepository.existsAuthorizedRating(sellerId, userId)) {
+        if (ratingRepository.existsAuthorizedBySellerIdAndAuthorId(sellerId, userId)) {
             throw new RatingAlreadyExistsException("You have already rated this seller.");
         }
     }
