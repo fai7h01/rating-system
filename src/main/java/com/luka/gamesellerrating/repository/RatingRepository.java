@@ -1,8 +1,6 @@
 package com.luka.gamesellerrating.repository;
 
-import com.luka.gamesellerrating.entity.AnonymousUser;
 import com.luka.gamesellerrating.entity.Rating;
-import com.luka.gamesellerrating.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,10 +19,4 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     boolean existsAnonymousBySellerIdAndAuthorId(@Param("sellerId") Long sellerId, @Param("authorId") String authorId);
 
     Optional<Rating> findBySellerIdAndId(Long sellerId, Long ratingId);
-
-    @Query("SELECT r.author FROM Rating r WHERE r.isAnonymous = false AND r.id = :ratingId")
-    Optional<User> findAuthorizedAuthor(@Param("ratingId") Long ratingId);
-
-    @Query("SELECT r.anonymousAuthor FROM Rating r WHERE r.isAnonymous = true AND r.id = :ratingId")
-    Optional<AnonymousUser> findAnonymousAuthor(@Param("ratingId") Long ratingId);
 }
