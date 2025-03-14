@@ -10,7 +10,6 @@ import com.luka.gamesellerrating.exception.UserNotFoundException;
 import com.luka.gamesellerrating.repository.UserRepository;
 import com.luka.gamesellerrating.service.EmailService;
 import com.luka.gamesellerrating.service.KeycloakService;
-import com.luka.gamesellerrating.service.RatingService;
 import com.luka.gamesellerrating.service.UserService;
 import com.luka.gamesellerrating.service.helper.RatingStatsUpdater;
 import com.luka.gamesellerrating.util.MapperUtil;

@@ -16,8 +16,6 @@ public class RatingUpdateScheduler {
     @Scheduled(fixedRate = 5_000)
     public void updateAllSellersOverallRating() {
         var allSellers = userService.findAllSellers();
-        allSellers.forEach(seller -> {
-            userService.updateOverallRating(seller.getId());
-        });
+        allSellers.forEach(seller -> userService.updateOverallRating(seller.getId()));
     }
 }

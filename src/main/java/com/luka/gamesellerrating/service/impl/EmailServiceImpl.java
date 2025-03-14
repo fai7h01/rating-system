@@ -20,7 +20,7 @@ import java.time.LocalDate;
 public class EmailServiceImpl implements EmailService {
 
     @Value("${app.base-url}")
-    private String BASE_URL;
+    private String baseUrl;
     @Value("${spring.mail.username}")
     private String fromEmail;
 
@@ -67,14 +67,14 @@ public class EmailServiceImpl implements EmailService {
 
     private String createVerificationEmailMessage(String email, String fullName, String token, LocalDate expiryDate) {
         String companyName = "Game items Marketplace";
-        String link = BASE_URL + "/api/v1/auth/confirmation?email=" + email + "&token=" + token;
+        String link = baseUrl + "/api/v1/auth/confirmation?email=" + email + "&token=" + token;
         String tokenExpiryDate = expiryDate.toString();
         return createVerificationEmailText(fullName, companyName, link, tokenExpiryDate);
     }
 
     private String createResetPasswordEmailMessage(String email, String fullName, String token, LocalDate expiryDate) {
         String companyName = "Game items Marketplace";
-        String link = BASE_URL + "/api/v1/auth/new-password?email=" + email + "&token=" + token;
+        String link = baseUrl + "/api/v1/auth/new-password?email=" + email + "&token=" + token;
         String tokenExpiryDate = expiryDate.toString();
         return createResetPasswordEmailText(fullName, companyName, link, tokenExpiryDate);
     }

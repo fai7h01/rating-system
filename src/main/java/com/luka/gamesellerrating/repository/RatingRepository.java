@@ -21,6 +21,6 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
 
     Optional<Rating> findBySellerIdAndId(Long sellerId, Long ratingId);
 
-    @Query("SELECT r.rating FROM Rating r WHERE r.seller.id = :sellerId AND r.status = 'APPROVED'")
+    @Query("SELECT r.value FROM Rating r WHERE r.seller.id = :sellerId AND r.status = 'APPROVED'")
     List<RatingValue> findAllRatingValueBySeller(@Param("sellerId") Long sellerId);
 }

@@ -19,7 +19,7 @@ import org.hibernate.annotations.SQLRestriction;
 public class Rating extends BaseEntity{
 
     @Enumerated(EnumType.STRING)
-    private RatingValue rating;
+    private RatingValue value;
 
     @OneToOne
     @JoinColumn(name = "comment_id", nullable = false)

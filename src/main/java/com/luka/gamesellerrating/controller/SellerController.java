@@ -33,12 +33,12 @@ public class SellerController {
 
     @GetMapping("/search")
     public ResponseEntity<ResponseWrapper> findSellersByUsername(@RequestParam("username") String username) {
-            return ok(ResponseWrapper.builder()
-                    .success(true)
-                    .code(HttpStatus.OK.value())
-                    .message("Seller(s) retrieved successfully")
-                    .data(userService.findSellersByUsernameContaining(username))
-                    .build());
+        return ok(ResponseWrapper.builder()
+                .success(true)
+                .code(HttpStatus.OK.value())
+                .message("Seller(s) retrieved successfully")
+                .data(userService.findSellersByUsernameContaining(username))
+                .build());
     }
 
 

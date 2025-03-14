@@ -4,7 +4,6 @@ import com.luka.gamesellerrating.dto.ResetPasswordDTO;
 import com.luka.gamesellerrating.dto.UserDTO;
 import com.luka.gamesellerrating.dto.wrapper.ResponseWrapper;
 import com.luka.gamesellerrating.service.EmailService;
-import com.luka.gamesellerrating.service.KeycloakService;
 import com.luka.gamesellerrating.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,12 +25,11 @@ public class AuthController {
 
     @PostMapping
     public ResponseEntity<ResponseWrapper> registerUser(@RequestBody UserDTO user) {
-        UserDTO registeredUser = userService.save(user);
         return status(HttpStatus.CREATED).body(ResponseWrapper.builder()
                 .success(true)
                 .code(HttpStatus.CREATED.value())
                 .message("User is successfully registered.")
-                .data(registeredUser).build());
+                .data(userService.save(user)).build());
     }
 
     @PostMapping("/confirmation")

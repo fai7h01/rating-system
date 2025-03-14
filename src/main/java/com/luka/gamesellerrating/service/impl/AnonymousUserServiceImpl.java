@@ -21,7 +21,6 @@ public class AnonymousUserServiceImpl implements AnonymousUserService {
         this.mapperUtil = mapperUtil;
     }
 
-
     @Override
     public List<AnonymousUserDTO> findAll() {
         return anonymousUserRepository.findAll().stream()
