@@ -7,6 +7,7 @@ import com.luka.gamesellerrating.enums.Role;
 import com.luka.gamesellerrating.enums.UserStatus;
 import com.luka.gamesellerrating.exception.UserAlreadyExistsException;
 import com.luka.gamesellerrating.exception.UserNotFoundException;
+import com.luka.gamesellerrating.mapper.UserMapper;
 import com.luka.gamesellerrating.repository.UserRepository;
 import com.luka.gamesellerrating.service.EmailService;
 import com.luka.gamesellerrating.service.KeycloakService;
@@ -29,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private final KeycloakService keycloakService;
     private final EmailService emailService;
     private final RatingStatsUpdater ratingStatsUpdater;
+    private final UserMapper userMapper;
     private final MapperUtil mapperUtil;
 
     public UserServiceImpl(UserRepository userRepository, @Lazy KeycloakService keycloakService, @Lazy EmailService emailService,
@@ -37,25 +39,24 @@ public class UserServiceImpl implements UserService {
         this.keycloakService = keycloakService;
         this.emailService = emailService;
         this.ratingStatsUpdater = ratingStatsUpdater;
+        this.userMapper = UserMapper.INSTANCE;
         this.mapperUtil = mapperUtil;
     }
 
     @Override
     public List<UserDTO> findAll() {
-        return userRepository.findAll().stream()
-                .map(user -> mapperUtil.convert(user, new UserDTO()))
-                .toList();
+        return userMapper.toDtoList(userRepository.findAll());
     }
 
     @Override
     @Transactional
     public UserDTO save(UserDTO user) {
         validateUser(user);
-        var userEntity = mapperUtil.convert(user, new User());
+        var userEntity = userMapper.toEntity(user);
         var savedEntity = userRepository.save(userEntity);
         keycloakService.userCreate(user);
         emailService.sendUserVerificationEmail(savedEntity.getEmail());
-        return mapperUtil.convert(savedEntity, new UserDTO());
+        return userMapper.toDto(savedEntity);
     }
 
     @Override
@@ -79,14 +80,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> findSellersByUsernameContaining(String username) {
-        return userRepository.findAllByUsernameContainingAndRole(username, Role.Seller).stream()
+        return userRepository.findAllByUsernameContainingAndRole(username, Role.SELLER).stream()
                 .map(user -> mapperUtil.convert(user, new UserDTO()))
                 .toList();
     }
 
     @Override
     public List<UserDTO> findAllSellers() {
-        return userRepository.findAllByRole(Role.Seller, Sort.by("overallRating")).stream()
+        return userRepository.findAllByRole(Role.SELLER, Sort.by("overallRating")).stream()
                 .map(user -> mapperUtil.convert(user, new UserDTO()))
                 .toList();
     }
