@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({UserAlreadyExistsException.class, AnonymousUserAlreadyExistsException.class,
-            RatingAlreadyExistsException.class, GameObjectAlreadyExistsException.class})
+            RatingAlreadyExistsException.class, GameObjectAlreadyExistsException.class, InvalidTokenException.class})
     public ResponseEntity<ExceptionWrapper> handleConflictExceptions(Throwable exception) {
         log.error(exception.getMessage());
         return status(HttpStatus.CONFLICT)
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
-    @ExceptionHandler(RatingAccessDeniedException.class)
+    @ExceptionHandler({RatingAccessDeniedException.class, GameObjectAccessDeniedException.class})
     public ResponseEntity<ExceptionWrapper> handleAccessDeniedException(RatingAccessDeniedException exception) {
         log.error(exception.getMessage());
         return status(HttpStatus.FORBIDDEN)

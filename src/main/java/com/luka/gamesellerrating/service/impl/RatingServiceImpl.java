@@ -43,7 +43,7 @@ public class RatingServiceImpl implements RatingService {
     @Override
     @Transactional
     public RatingDTO update(Long sellerId, Long ratingId, RatingDTO ratingDTO) {
-        var ratingEntity = findRatingBySellerAndId(sellerId, ratingId);
+        var ratingEntity = findRatingEntityBySellerAndId(sellerId, ratingId);
         ratingValidator.validateUserAccess(ratingEntity);
         updateRatingFields(ratingEntity, ratingDTO);
         return mapperUtil.convert(ratingRepository.save(ratingEntity), new RatingDTO());
@@ -59,7 +59,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingDTO findBySeller(Long sellerId, Long ratingId) {
-        var foundRating = findRatingBySellerAndId(sellerId, ratingId);
+        var foundRating = findRatingEntityBySellerAndId(sellerId, ratingId);
         return mapperUtil.convert(foundRating, new RatingDTO());
     }
 
@@ -81,7 +81,7 @@ public class RatingServiceImpl implements RatingService {
     }
 
 
-    private Rating findRatingBySellerAndId(Long sellerId, Long ratingId) {
+    private Rating findRatingEntityBySellerAndId(Long sellerId, Long ratingId) {
         return ratingRepository.findBySellerIdAndId(sellerId, ratingId)
                 .orElseThrow(() -> new RatingNotFoundException("Rating not found"));
     }

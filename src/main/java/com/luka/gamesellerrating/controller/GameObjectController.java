@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.ResponseEntity.*;
 
 @RestController
-@RequestMapping("/api/game-objects")
+@RequestMapping("/api/v1/game-objects")
 public class GameObjectController {
 
     private final GameObjectService gameObjectService;
@@ -21,15 +23,39 @@ public class GameObjectController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseWrapper> listAll() {
+    public ResponseEntity<ResponseWrapper> findAll() {
         List<GameObjectDTO> gameObjects = gameObjectService.findAll();
-        return ok(ResponseWrapper.builder().data(gameObjects).build());
+        return ok(ResponseWrapper.builder()
+                .success(true)
+                .code(OK.value())
+                .message("Game objects retrieved successfully")
+                .data(gameObjects)
+                .build());
+    }
+
+    @GetMapping("/{sellerId}")
+    public ResponseEntity<ResponseWrapper> findAllBySeller(@PathVariable("sellerId") Long id) {
+        return ok(ResponseWrapper.builder()
+                .success(true)
+                .code(OK.value())
+                .message("Game objects retrieved successfully")
+                .data(gameObjectService.findAllBySellerId(id))
+                .build());
     }
 
     @PostMapping
     public ResponseEntity<ResponseWrapper> createGameObj(@RequestBody GameObjectDTO gameObject) {
-        GameObjectDTO saved = gameObjectService.save(gameObject);
-        return ok(ResponseWrapper.builder().data(saved).build());
+        return status(CREATED).body(ResponseWrapper.builder()
+                .success(true)
+                .code(CREATED.value())
+                .message("Game object created successfully")
+                .data(gameObjectService.save(gameObject))
+                .build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseWrapper> updateGameObject(@PathVariable("id") Long id) {
+        return noContent().build();
     }
 
     @DeleteMapping("/{id}")
