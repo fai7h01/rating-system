@@ -1,5 +1,6 @@
 package com.luka.gamesellerrating.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,9 +19,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.luka.gamesellerrating.enums.Role.ADMIN;
+import static com.luka.gamesellerrating.enums.Role.SELLER;
+import static org.springframework.http.HttpMethod.*;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${keycloak.resource}")
+    private String kcResource;
+    @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
+    private String jwkSetUri;
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -28,7 +39,13 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(httpRequests -> httpRequests
-                        .requestMatchers("/api/v1/admin/**").hasAuthority("Admin")
+                        .requestMatchers("/api/v1/admin/**").hasAuthority(ADMIN.getValue())
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/sellers/**").permitAll()
+                        .requestMatchers(GET, "/api/v1/game-objects/**").permitAll()
+                        .requestMatchers(POST,"/api/v1/game-objects").hasAuthority(SELLER.getValue())
+                        .requestMatchers(PUT, "/api/v1/game-objects").hasAuthority(SELLER.getValue())
+                        .requestMatchers(DELETE, "/api/v1/game-objects/*").hasAuthority(SELLER.getValue())
                         .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
 
@@ -38,7 +55,7 @@ public class SecurityConfig {
 
                     resourceAccess.forEach((resource, resourceClaims) -> {
 
-                        if (resource.equals("rating-system")) {
+                        if (resource.equals(kcResource)) {
 
                             Collection<String> roles = resourceClaims.get("roles");
 
@@ -52,7 +69,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withJwkSetUri("http://localhost:8080/auth/realms/leverx/protocol/openid-connect/certs")
+        return NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
                 .build();
     }
 
