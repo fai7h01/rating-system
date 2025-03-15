@@ -7,7 +7,6 @@ import com.luka.gamesellerrating.enums.TokenType;
 import com.luka.gamesellerrating.exception.UserNotFoundException;
 import com.luka.gamesellerrating.service.KeycloakService;
 import com.luka.gamesellerrating.service.TokenService;
-import com.luka.gamesellerrating.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.adapters.springsecurity.KeycloakAuthenticationException;
 import org.keycloak.admin.client.Keycloak;
@@ -17,18 +16,14 @@ import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
+import static com.luka.gamesellerrating.enums.TokenType.VERIFICATION_TOKEN;
 import static org.keycloak.admin.client.CreatedResponseUtil.getCreatedId;
 
 @Slf4j
@@ -124,7 +119,7 @@ public class KeycloakServiceImpl implements KeycloakService {
 
     @Override
     public void verifyUserEmail(String email, String token) {
-        tokenService.validateToken(email, token, TokenType.VERIFICATION);
+        tokenService.validateToken(email, token, VERIFICATION_TOKEN);
         activateUser(email);
     }
 

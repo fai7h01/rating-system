@@ -7,8 +7,8 @@ import java.time.Duration;
 @Getter
 public enum TokenType {
 
-    VERIFICATION("verification"),
-    RESET_PASSWORD("reset_password");
+    VERIFICATION_TOKEN("verification"),
+    RESET_PASSWORD_TOKEN("reset_password");
 
     private final String value;
 
@@ -18,8 +18,8 @@ public enum TokenType {
 
     public Duration getDuration() {
         return switch (this) {
-            case VERIFICATION -> Duration.ofDays(1);
-            case RESET_PASSWORD -> Duration.ofHours(1);
+            case VERIFICATION_TOKEN -> Duration.ofDays(1);
+            case RESET_PASSWORD_TOKEN -> Duration.ofHours(1);
         };
     }
 

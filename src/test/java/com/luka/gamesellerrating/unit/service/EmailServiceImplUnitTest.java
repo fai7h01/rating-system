@@ -46,7 +46,7 @@ public class EmailServiceImplUnitTest {
         TokenDTO tokenDTO = new TokenDTO();
         tokenDTO.setToken("dummyToken");
         tokenDTO.setExpiryDate(LocalDate.now().plusDays(1));
-        when(tokenService.generateToken(any(), eq(TokenType.VERIFICATION))).thenReturn(tokenDTO);
+        when(tokenService.generateToken(any(), eq(TokenType.VERIFICATION_TOKEN))).thenReturn(tokenDTO);
     }
 
     @Test
