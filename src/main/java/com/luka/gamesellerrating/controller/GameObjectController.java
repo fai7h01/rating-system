@@ -54,8 +54,13 @@ public class GameObjectController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseWrapper> updateGameObject(@PathVariable("id") Long id) {
-        return noContent().build();
+    public ResponseEntity<ResponseWrapper> updateGameObject(@PathVariable("id") Long id, @RequestBody GameObjectDTO gameObj) {
+        return ok(ResponseWrapper.builder()
+                .success(true)
+                .code(OK.value())
+                .message("Game object updated successfully")
+                .data(gameObjectService.update(id, gameObj))
+                .build());
     }
 
     @DeleteMapping("/{id}")

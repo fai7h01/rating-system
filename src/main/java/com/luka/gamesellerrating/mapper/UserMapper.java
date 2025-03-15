@@ -4,14 +4,11 @@ package com.luka.gamesellerrating.mapper;
 import com.luka.gamesellerrating.dto.UserDTO;
 import com.luka.gamesellerrating.entity.User;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface UserMapper {
-
-    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     UserDTO toDto(User entity);
 

@@ -24,4 +24,8 @@ public class AnonymousUser extends BaseEntity{
     public AnonymousUser() {
         this.username = Faker.instance().name().username();
     }
+
+    public static AnonymousUser create() {
+        return new AnonymousUser();
+    }
 }

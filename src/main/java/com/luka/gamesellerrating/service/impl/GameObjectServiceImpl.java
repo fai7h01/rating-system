@@ -6,82 +6,56 @@ import com.luka.gamesellerrating.entity.GameObject;
 import com.luka.gamesellerrating.exception.GameObjectAccessDeniedException;
 import com.luka.gamesellerrating.exception.GameObjectAlreadyExistsException;
 import com.luka.gamesellerrating.exception.GameObjectNotFoundException;
+import com.luka.gamesellerrating.mapper.GameObjectMapper;
 import com.luka.gamesellerrating.repository.GameObjectRepository;
 import com.luka.gamesellerrating.service.AuthenticationService;
 import com.luka.gamesellerrating.service.GameObjectService;
-import com.luka.gamesellerrating.util.MapperUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class GameObjectServiceImpl implements GameObjectService {
 
     private final GameObjectRepository gameObjectRepository;
     private final AuthenticationService authService;
-    private final MapperUtil mapperUtil;
-
-    public GameObjectServiceImpl(GameObjectRepository gameObjectRepository, AuthenticationService authService, MapperUtil mapperUtil) {
-        this.gameObjectRepository = gameObjectRepository;
-        this.authService = authService;
-        this.mapperUtil = mapperUtil;
-    }
+    private final GameObjectMapper gameObjMapper;
 
     @Override
     public GameObjectDTO save(GameObjectDTO gameObject) {
-        var seller = getLoggedInUser();
-        if (gameObjectRepository.existsBySellerIdAndTitle(seller.getId(), gameObject.getTitle())) {
-            throw new GameObjectAlreadyExistsException("Game obj already exists with that title.");
-        }
-        gameObject.setSeller(seller);
-        var entity = mapperUtil.convert(gameObject, new GameObject());
-        var savedGameObj = gameObjectRepository.save(entity);
-        return mapperUtil.convert(savedGameObj, new GameObjectDTO());
+        validateNewGameObject(gameObject.getTitle());
+        var currentUser = getLoggedInUser();
+        gameObject.setSeller(currentUser);
+        var entity =gameObjMapper.toEntity(gameObject);
+        return gameObjMapper.toDto(gameObjectRepository.save(entity));
     }
 
     @Override
     public GameObjectDTO update(Long id, GameObjectDTO gameObject) {
         var foundGameObj = findGameObjEntityById(id);
-        validateUserAccess(foundGameObj);
+        validateUserAccess(foundGameObj.getSeller().getId());
         updateGameObjFields(foundGameObj, gameObject);
-        var savedGameObj = gameObjectRepository.save(foundGameObj);
-        return mapperUtil.convert(savedGameObj, new GameObjectDTO());
+        return gameObjMapper.toDto(gameObjectRepository.save(foundGameObj));
     }
 
     @Override
     public List<GameObjectDTO> findAll() {
-        return gameObjectRepository.findAll().stream()
-                .map(mapperUtil.convertTo(GameObjectDTO.class))
-                .toList();
+        return gameObjMapper.toDtoList(gameObjectRepository.findAll());
     }
 
     @Override
     public List<GameObjectDTO> findAllBySellerId(Long id) {
-        return gameObjectRepository.findAllBySellerId(id).stream()
-                .map(mapperUtil.convertTo(GameObjectDTO.class))
-                .toList();
+        return gameObjMapper.toDtoList(gameObjectRepository.findAllBySellerId(id));
     }
 
     @Override
     public void delete(Long id) {
         var foundGameObj = findGameObjEntityById(id);
-        validateUserAccess(foundGameObj);
+        validateUserAccess(foundGameObj.getSeller().getId());
         foundGameObj.setIsDeleted(true);
         gameObjectRepository.save(foundGameObj);
-    }
-
-    private void validateUserAccess(GameObject gameObject) {
-        if (authService.isUserAnonymous()) {
-            throw new GameObjectAccessDeniedException("Only author can manage their own item.");
-        }
-        var currentUserId = getLoggedInUser().getId();
-        if (!gameObject.getSeller().getId().equals(currentUserId)) {
-            throw new GameObjectAccessDeniedException("Only author can manage their own item.");
-        }
-    }
-
-    private UserDTO getLoggedInUser() {
-        return authService.getLoggedInUser();
     }
 
     private GameObject findGameObjEntityById(Long id) {
@@ -92,5 +66,23 @@ public class GameObjectServiceImpl implements GameObjectService {
     private void updateGameObjFields(GameObject entity, GameObjectDTO dto) {
         entity.setText(dto.getText());
         entity.setTitle(dto.getTitle());
+    }
+
+    private void validateNewGameObject(String objTitle) {
+        var currentUser = getLoggedInUser();
+        if (gameObjectRepository.existsBySellerIdAndTitle(currentUser.getId(), objTitle)) {
+            throw new GameObjectAlreadyExistsException("Game obj already exists with that title.");
+        }
+    }
+
+    private void validateUserAccess(Long sellerId) {
+        var currentUser = getLoggedInUser();
+        if (!currentUser.getId().equals(sellerId)) {
+            throw new GameObjectAccessDeniedException("Only author can manage their own item.");
+        }
+    }
+
+    private UserDTO getLoggedInUser() {
+        return authService.getLoggedInUser();
     }
 }

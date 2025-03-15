@@ -1,27 +1,26 @@
 package com.luka.gamesellerrating.service.impl;
 
 import com.luka.gamesellerrating.dto.CommentDTO;
-import com.luka.gamesellerrating.entity.Comment;
+import com.luka.gamesellerrating.mapper.CommentMapper;
 import com.luka.gamesellerrating.repository.CommentRepository;
 import com.luka.gamesellerrating.service.CommentService;
-import com.luka.gamesellerrating.util.MapperUtil;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
-    private final MapperUtil mapperUtil;
+    private final CommentMapper commentMapper;
 
-    public CommentServiceImpl(CommentRepository commentRepository, MapperUtil mapperUtil) {
+    public CommentServiceImpl(CommentRepository commentRepository, CommentMapper commentMapper) {
         this.commentRepository = commentRepository;
-        this.mapperUtil = mapperUtil;
+        this.commentMapper = commentMapper;
     }
 
     @Override
     public CommentDTO save(CommentDTO comment) {
-        var commentEntity = mapperUtil.convert(comment, new Comment());
+        var commentEntity = commentMapper.toEntity(comment);
         var savedComment = commentRepository.save(commentEntity);
-        return mapperUtil.convert(savedComment, new CommentDTO());
+        return commentMapper.toDto(savedComment);
     }
 }

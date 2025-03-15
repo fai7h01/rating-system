@@ -18,7 +18,7 @@ public class RatingDTO {
 
     @JsonProperty(access = READ_ONLY)
     private Long id;
-    private RatingValue rating;
+    private RatingValue stars;
     private CommentDTO comment;
     @JsonProperty(access = READ_ONLY)
     private UserDTO author;

@@ -4,11 +4,11 @@ import com.luka.gamesellerrating.dto.RatingDTO;
 import com.luka.gamesellerrating.entity.*;
 import com.luka.gamesellerrating.enums.RatingStatus;
 import com.luka.gamesellerrating.exception.RatingNotFoundException;
+import com.luka.gamesellerrating.mapper.RatingMapper;
 import com.luka.gamesellerrating.repository.RatingRepository;
 import com.luka.gamesellerrating.service.*;
 import com.luka.gamesellerrating.service.helper.RatingFactory;
 import com.luka.gamesellerrating.service.helper.RatingValidator;
-import com.luka.gamesellerrating.util.MapperUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,13 +22,13 @@ public class RatingServiceImpl implements RatingService {
     private final RatingRepository ratingRepository;
     private final RatingFactory ratingFactory;
     private final RatingValidator ratingValidator;
-    private final MapperUtil mapperUtil;
+    private final RatingMapper ratingMapper;
 
-    public RatingServiceImpl(RatingRepository ratingRepository, MapperUtil mapperUtil, RatingFactory ratingFactory, RatingValidator ratingValidator) {
+    public RatingServiceImpl(RatingRepository ratingRepository, RatingFactory ratingFactory, RatingValidator ratingValidator, RatingMapper ratingMapper) {
         this.ratingRepository = ratingRepository;
-        this.mapperUtil = mapperUtil;
         this.ratingFactory = ratingFactory;
         this.ratingValidator = ratingValidator;
+        this.ratingMapper = ratingMapper;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class RatingServiceImpl implements RatingService {
         var preparedRating = ratingFactory.createRating(sellerId, rating);
         ratingValidator.validateDuplicateRating(preparedRating);
         var savedRating = ratingRepository.save(preparedRating);
-        return mapperUtil.convert(savedRating, new RatingDTO());
+        return ratingMapper.toDto(savedRating);
     }
 
     @Override
@@ -46,21 +46,19 @@ public class RatingServiceImpl implements RatingService {
         var ratingEntity = findRatingEntityBySellerAndId(sellerId, ratingId);
         ratingValidator.validateUserAccess(ratingEntity);
         updateRatingFields(ratingEntity, ratingDTO);
-        return mapperUtil.convert(ratingRepository.save(ratingEntity), new RatingDTO());
+        return ratingMapper.toDto(ratingRepository.save(ratingEntity));
     }
 
 
     @Override
     public List<RatingDTO> findAllBySeller(Long sellerId) {
-        return ratingRepository.findAllBySellerId(sellerId).stream()
-                .map(mapperUtil.convertTo(RatingDTO.class))
-                .toList();
+        return ratingMapper.toDtoList(ratingRepository.findAllBySellerId(sellerId));
     }
 
     @Override
     public RatingDTO findBySeller(Long sellerId, Long ratingId) {
         var foundRating = findRatingEntityBySellerAndId(sellerId, ratingId);
-        return mapperUtil.convert(foundRating, new RatingDTO());
+        return ratingMapper.toDto(foundRating);
     }
 
     @Override
@@ -87,7 +85,7 @@ public class RatingServiceImpl implements RatingService {
     }
 
     private void updateRatingFields(Rating entity, RatingDTO dto) {
-        entity.setValue(dto.getRating());
+        entity.setValue(dto.getStars());
         entity.getComment().setMessage(dto.getComment().getMessage());
     }
 

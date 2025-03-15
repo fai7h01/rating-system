@@ -13,7 +13,6 @@ import com.luka.gamesellerrating.service.EmailService;
 import com.luka.gamesellerrating.service.KeycloakService;
 import com.luka.gamesellerrating.service.UserService;
 import com.luka.gamesellerrating.service.helper.RatingStatsUpdater;
-import com.luka.gamesellerrating.util.MapperUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
@@ -31,16 +30,14 @@ public class UserServiceImpl implements UserService {
     private final EmailService emailService;
     private final RatingStatsUpdater ratingStatsUpdater;
     private final UserMapper userMapper;
-    private final MapperUtil mapperUtil;
 
     public UserServiceImpl(UserRepository userRepository, @Lazy KeycloakService keycloakService, @Lazy EmailService emailService,
-                           RatingStatsUpdater ratingStatsUpdater, MapperUtil mapperUtil) {
+                           RatingStatsUpdater ratingStatsUpdater, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.keycloakService = keycloakService;
         this.emailService = emailService;
         this.ratingStatsUpdater = ratingStatsUpdater;
-        this.userMapper = UserMapper.INSTANCE;
-        this.mapperUtil = mapperUtil;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -69,27 +66,23 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO findById(Long id) {
         var foundUser = findUserEntityById(id);
-        return mapperUtil.convert(foundUser, new UserDTO());
+        return userMapper.toDto(foundUser);
     }
 
     @Override
     public UserDTO findByEmail(String email) {
         var foundUser = findUserEntityByEmail(email);
-        return mapperUtil.convert(foundUser, new UserDTO());
+        return userMapper.toDto(foundUser);
     }
 
     @Override
     public List<UserDTO> findSellersByUsernameContaining(String username) {
-        return userRepository.findAllByUsernameContainingAndRole(username, Role.SELLER).stream()
-                .map(user -> mapperUtil.convert(user, new UserDTO()))
-                .toList();
+        return userMapper.toDtoList(userRepository.findAllByUsernameContainingAndRole(username, Role.SELLER));
     }
 
     @Override
     public List<UserDTO> findAllSellers() {
-        return userRepository.findAllByRole(Role.SELLER, Sort.by("overallRating")).stream()
-                .map(user -> mapperUtil.convert(user, new UserDTO()))
-                .toList();
+        return userMapper.toDtoList(userRepository.findAllByRole(Role.SELLER, Sort.by("overallRating")));
     }
 
     @Override
@@ -114,7 +107,7 @@ public class UserServiceImpl implements UserService {
         var foundUser = findUserEntityByEmail(email);
         foundUser.setPassword(newPassword.getNewPassword());
         var savedUser = userRepository.save(foundUser);
-        keycloakService.userUpdate(mapperUtil.convert(savedUser, new UserDTO()));
+        keycloakService.userUpdate(userMapper.toDto(savedUser));
     }
 
     private void validateUser(UserDTO user) {
