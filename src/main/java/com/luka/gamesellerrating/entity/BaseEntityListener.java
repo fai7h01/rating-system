@@ -34,6 +34,7 @@ public class BaseEntityListener extends AuditingEntityListener {
         entity.setLastUpdateUserId(userId);
     }
 
+    //TODO bug here
     private Long getCurrentUserId() {
         try {
             var user = authService.getLoggedInUser();

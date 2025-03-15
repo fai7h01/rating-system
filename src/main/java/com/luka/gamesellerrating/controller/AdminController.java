@@ -60,5 +60,4 @@ public class AdminController {
         ratingService.updateStatus(id, status);
         return noContent().build();
     }
-
 }

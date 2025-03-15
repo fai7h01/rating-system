@@ -41,7 +41,7 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    @Transactional
+    @Transactional // TODO bug here
     public RatingDTO update(Long sellerId, Long ratingId, RatingDTO ratingDTO) {
         var ratingEntity = findRatingEntityBySellerAndId(sellerId, ratingId);
         ratingValidator.validateUserAccess(ratingEntity);
@@ -71,8 +71,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public void delete(Long sellerId, Long ratingId) {
-        var rating = ratingRepository.findBySellerIdAndId(sellerId, ratingId)
-                .orElseThrow(() -> new RatingNotFoundException("Rating not found."));
+        var rating = findRatingEntityBySeller(sellerId, ratingId);
         ratingValidator.validateUserAccess(rating);
         rating.setIsDeleted(true);
         ratingRepository.save(rating);
@@ -80,6 +79,10 @@ public class RatingServiceImpl implements RatingService {
 
 
     private Rating findRatingEntityBySellerAndId(Long sellerId, Long ratingId) {
+        return findRatingEntityBySeller(sellerId, ratingId);
+    }
+
+    private Rating findRatingEntityBySeller(Long sellerId, Long ratingId) {
         return ratingRepository.findBySellerIdAndId(sellerId, ratingId)
                 .orElseThrow(() -> new RatingNotFoundException("Rating not found"));
     }

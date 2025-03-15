@@ -22,5 +22,4 @@ public class AnonymousUserDTO {
     private String username;
     @JsonProperty(access = READ_ONLY)
     private String identifier;
-
 }

@@ -12,5 +12,4 @@ public class ValidationExceptionWrapper {
     private String errorField;
     private Object rejectedValue;
     private String reason;
-
 }

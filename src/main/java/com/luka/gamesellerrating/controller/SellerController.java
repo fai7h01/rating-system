@@ -40,6 +40,4 @@ public class SellerController {
                 .data(userService.findSellersByUsernameContaining(username))
                 .build());
     }
-
-
 }

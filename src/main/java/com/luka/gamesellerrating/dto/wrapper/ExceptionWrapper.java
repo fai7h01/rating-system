@@ -23,5 +23,4 @@ public class ExceptionWrapper {
 
     private Integer errorCount;
     private List<ValidationExceptionWrapper> validationExceptions;
-
 }

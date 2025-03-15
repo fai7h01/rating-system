@@ -14,5 +14,4 @@ public class ResponseWrapper {
     private String message;
     private Integer code;
     private Object data;
-
 }

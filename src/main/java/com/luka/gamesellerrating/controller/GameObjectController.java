@@ -68,5 +68,4 @@ public class GameObjectController {
         gameObjectService.delete(id);
         return noContent().build();
     }
-
 }

@@ -16,5 +16,4 @@ public enum RatingValue {
     RatingValue(int value) {
         this.value = value;
     }
-
 }

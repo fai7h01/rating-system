@@ -18,8 +18,4 @@ public class ResetPasswordDTO {
     private String newPassword;
     @NotBlank
     private String confirmPassword;
-
-
-
-
 }

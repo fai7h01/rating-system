@@ -34,5 +34,4 @@ public class User extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private UserStatus status;
     private BigDecimal overallRating;
-
 }
