@@ -9,12 +9,11 @@ import com.luka.gamesellerrating.exception.UserAlreadyExistsException;
 import com.luka.gamesellerrating.exception.UserNotFoundException;
 import com.luka.gamesellerrating.mapper.UserMapper;
 import com.luka.gamesellerrating.repository.UserRepository;
-import com.luka.gamesellerrating.service.EmailService;
-import com.luka.gamesellerrating.service.KeycloakService;
 import com.luka.gamesellerrating.service.UserService;
 import com.luka.gamesellerrating.service.helper.RatingStatsUpdater;
+import com.luka.gamesellerrating.service.helper.UserManagementFacade;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,22 +22,13 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final KeycloakService keycloakService;
-    private final EmailService emailService;
-    private final RatingStatsUpdater ratingStatsUpdater;
+    private final UserManagementFacade userManagementFacade;
     private final UserMapper userMapper;
-
-    public UserServiceImpl(UserRepository userRepository, @Lazy KeycloakService keycloakService, @Lazy EmailService emailService,
-                           RatingStatsUpdater ratingStatsUpdater, UserMapper userMapper) {
-        this.userRepository = userRepository;
-        this.keycloakService = keycloakService;
-        this.emailService = emailService;
-        this.ratingStatsUpdater = ratingStatsUpdater;
-        this.userMapper = userMapper;
-    }
+    private final RatingStatsUpdater ratingStatsUpdater;
 
     @Override
     public List<UserDTO> findAll() {
@@ -51,8 +41,7 @@ public class UserServiceImpl implements UserService {
         validateUser(user);
         var userEntity = userMapper.toEntity(user);
         var savedEntity = userRepository.save(userEntity);
-        keycloakService.userCreate(user);
-        emailService.sendUserVerificationEmail(savedEntity.getEmail());
+        userManagementFacade.createUser(user);
         return userMapper.toDto(savedEntity);
     }
 
@@ -77,7 +66,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> findSellersByUsernameContaining(String username) {
-        return userMapper.toDtoList(userRepository.findAllByUsernameContainingAndRole(username, Role.SELLER));
+        var sellers = userRepository.findAllByUsernameContainingAndRole(username, Role.SELLER);
+        return userMapper.toDtoList(sellers);
     }
 
     @Override
@@ -98,7 +88,7 @@ public class UserServiceImpl implements UserService {
         var foundUser = findUserEntityByEmail(email);
         foundUser.setEmailVerified(true);
         userRepository.save(foundUser);
-        keycloakService.verifyUserEmail(email, token);
+        userManagementFacade.verifyUserEmail(email, token);
     }
 
     @Override
@@ -106,8 +96,7 @@ public class UserServiceImpl implements UserService {
     public void resetPassword(String email, String token, ResetPasswordDTO newPassword) {
         var foundUser = findUserEntityByEmail(email);
         foundUser.setPassword(newPassword.getNewPassword());
-        var savedUser = userRepository.save(foundUser);
-        keycloakService.userUpdate(userMapper.toDto(savedUser));
+        userManagementFacade.updateUser(userMapper.toDto(foundUser));
     }
 
     private void validateUser(UserDTO user) {

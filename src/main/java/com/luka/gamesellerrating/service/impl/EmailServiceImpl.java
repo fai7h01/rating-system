@@ -8,6 +8,7 @@ import com.luka.gamesellerrating.service.TokenService;
 import com.luka.gamesellerrating.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -31,7 +32,7 @@ public class EmailServiceImpl implements EmailService {
     private final TokenService tokenService;
     private final UserService userService;
 
-    public EmailServiceImpl(JavaMailSender mailSender, TokenService tokenService, UserService userService) {
+    public EmailServiceImpl(JavaMailSender mailSender, TokenService tokenService, @Lazy UserService userService) {
         this.mailSender = mailSender;
         this.tokenService = tokenService;
         this.userService = userService;
