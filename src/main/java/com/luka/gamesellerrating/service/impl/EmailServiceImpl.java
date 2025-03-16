@@ -64,7 +64,6 @@ public class EmailServiceImpl implements EmailService {
                 : tokenService.generateToken(email, RESET_PASSWORD_TOKEN);
     }
 
-    //TODO refactor needed
     private String createMessage(String email, TokenDTO token, EmailType emailType) {
         return emailType.equals(VERIFICATION_EMAIL)
                 ? createVerificationEmailMessage(email, token)

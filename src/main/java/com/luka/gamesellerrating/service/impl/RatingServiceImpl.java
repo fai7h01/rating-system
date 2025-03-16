@@ -41,7 +41,7 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    @Transactional // TODO bug here
+    @Transactional
     public RatingDTO update(Long sellerId, Long ratingId, RatingDTO ratingDTO) {
         var ratingEntity = findRatingEntityBySellerAndId(sellerId, ratingId);
         ratingValidator.validateUserAccess(ratingEntity);

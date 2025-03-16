@@ -2,6 +2,7 @@ package com.luka.gamesellerrating.controller;
 
 import com.luka.gamesellerrating.dto.wrapper.ResponseWrapper;
 import com.luka.gamesellerrating.service.UserService;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,12 +23,13 @@ public class SellerController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseWrapper> findAllSellers() {
+    public ResponseEntity<ResponseWrapper> findAllSellers(@RequestParam(value = "sort", defaultValue = "overallRating") String sortBy,
+                                                          @RequestParam(value = "dir", defaultValue = "desc") String direction) {
         return ok(ResponseWrapper.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
                 .message("Sellers retrieved successfully")
-                .data(userService.findAllSellers())
+                .data(userService.findAllSellers(Sort.by(sortBy)))
                 .build());
     }
 

@@ -80,9 +80,9 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDtoList(userRepository.findAllByUsernameContainingAndRole(username, Role.SELLER));
     }
 
-    @Override //TODO use Page
-    public List<UserDTO> findAllSellers() {
-        return userMapper.toDtoList(userRepository.findAllByRole(Role.SELLER, Sort.by("overallRating")));
+    @Override
+    public List<UserDTO> findAllSellers(Sort sort) {
+        return userMapper.toDtoList(userRepository.findAllByRole(Role.SELLER, sort.descending()));
     }
 
     @Override
