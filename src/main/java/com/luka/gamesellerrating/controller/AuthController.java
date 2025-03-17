@@ -5,6 +5,7 @@ import com.luka.gamesellerrating.dto.UserDTO;
 import com.luka.gamesellerrating.dto.wrapper.ResponseWrapper;
 import com.luka.gamesellerrating.service.EmailService;
 import com.luka.gamesellerrating.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class AuthController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseWrapper> registerUser(@RequestBody UserDTO user) {
+    public ResponseEntity<ResponseWrapper> registerUser(@RequestBody @Valid UserDTO user) {
         return status(HttpStatus.CREATED).body(ResponseWrapper.builder()
                 .success(true)
                 .code(HttpStatus.CREATED.value())
