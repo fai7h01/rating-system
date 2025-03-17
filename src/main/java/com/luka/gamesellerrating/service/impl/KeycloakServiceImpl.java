@@ -3,12 +3,12 @@ package com.luka.gamesellerrating.service.impl;
 import com.luka.gamesellerrating.config.KeycloakProperties;
 import com.luka.gamesellerrating.dto.UserDTO;
 import com.luka.gamesellerrating.enums.Role;
-import com.luka.gamesellerrating.enums.TokenType;
+import com.luka.gamesellerrating.exception.KeycloakUserCreateException;
 import com.luka.gamesellerrating.exception.UserNotFoundException;
 import com.luka.gamesellerrating.service.KeycloakService;
 import com.luka.gamesellerrating.service.TokenService;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.adapters.springsecurity.KeycloakAuthenticationException;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -19,7 +19,6 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,7 +53,7 @@ public class KeycloakServiceImpl implements KeycloakService {
 
         } catch (Exception e) {
             log.error("Failed to register user in keycloak: {}", e.getMessage());
-            throw new KeycloakAuthenticationException("User registration failed", e);
+            throw new KeycloakUserCreateException("Failed to register user in keycloak.");
         }
     }
 

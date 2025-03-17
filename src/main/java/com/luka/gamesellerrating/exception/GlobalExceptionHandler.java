@@ -64,4 +64,16 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler(KeycloakUserCreateException.class)
+    public ResponseEntity<ExceptionWrapper> handleKeycloakUserCreateException(KeycloakUserCreateException exception) {
+        log.error(exception.getMessage());
+        return status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ExceptionWrapper.builder()
+                        .success(false)
+                        .message(exception.getMessage())
+                        .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
+
 }

@@ -6,6 +6,7 @@ volumes:
 services:
   postgres:
     image: postgres
+    container_name: rating-system-pg
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
