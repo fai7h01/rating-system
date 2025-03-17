@@ -28,7 +28,7 @@ public class UserDTO {
     private String username;
     @JsonProperty(access = WRITE_ONLY)
     private String password;
-    @JsonProperty(access = READ_ONLY)
+    @JsonProperty(access = WRITE_ONLY)
     private String confirmPassword;
     private Role role;
     @JsonProperty(access = READ_ONLY)

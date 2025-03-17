@@ -19,7 +19,6 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 
 import static com.luka.gamesellerrating.enums.TokenType.VERIFICATION_TOKEN;
@@ -40,80 +39,25 @@ public class KeycloakServiceImpl implements KeycloakService {
     @Override
     @Transactional
     public void userCreate(UserDTO dto) {
-
         UserRepresentation keycloakUser = getUserRepresentation(dto);
-
         try (Keycloak keycloak = getKeycloakInstance()) {
             RealmResource realmResource = keycloak.realm(keycloakProperties.getRealm());
-            Response response = realmResource.users().create(keycloakUser);
-
-            if (response.getStatus() == 201) {
-                assignClientRole(realmResource, getCreatedId(response), dto.getRole());
-            }
-
-        } catch (Exception e) {
-            log.error("Failed to register user in keycloak: {}", e.getMessage());
-            throw new KeycloakUserCreateException("Failed to register user in keycloak.");
+            Response response = createUser(realmResource, keycloakUser);
+            handleResponse(response);
+            updateClientRoles(keycloak.realm(keycloakProperties.getRealm()), getCreatedId(response), dto.getRole());
         }
     }
 
     @Override
     public void userUpdate(UserDTO dto) {
-
         try (Keycloak keycloak = getKeycloakInstance()) {
-
-            RealmResource realmResource = keycloak.realm(keycloakProperties.getRealm());
-            UsersResource usersResource = realmResource.users();
-
-            List<UserRepresentation> userRepresentations = usersResource.search(dto.getUsername());
-
-            if (userRepresentations.isEmpty()) {
-                throw new UserNotFoundException("User does not exist.");
-            }
-
-            UserRepresentation keycloakUser = userRepresentations.get(0);
-
-            updateRoles(realmResource, keycloakUser.getId(), dto.getRole().getValue());
-
-            keycloakUser.setFirstName(dto.getFirstName());
-            keycloakUser.setLastName(dto.getLastName());
-
-            if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-                updatePassword(usersResource, keycloakUser.getId(), dto.getPassword());
-            }
-
-            usersResource.get(keycloakUser.getId()).update(keycloakUser);
+            RealmResource realm = keycloak.realm(keycloakProperties.getRealm());
+            UserRepresentation user = findUserByEmail(realm.users(), dto.getEmail());
+            updateUserFields(user, dto);
+            updateClientRoles(realm, user.getId(), dto.getRole());
+            updatePasswordIfNeeded(realm.users(), user.getId(), dto.getPassword());
+            realm.users().get(user.getId()).update(user);
         }
-    }
-
-    private void updateRoles(RealmResource realmResource, String userId, String role) {
-
-        ClientRepresentation appClient = realmResource.clients()
-                .findByClientId(keycloakProperties.getClientId()).get(0);
-
-        String clientId = appClient.getId();
-
-        List<RoleRepresentation> existingRoles = realmResource.users().get(userId)
-                .roles().clientLevel(clientId).listEffective();
-        existingRoles.forEach(existingRole -> realmResource.users().get(userId)
-                .roles().clientLevel(clientId).remove(Collections.singletonList(existingRole)));
-
-        RoleRepresentation userClientRole = realmResource.clients().get(clientId)
-                .roles().get(role).toRepresentation();
-
-        realmResource.users().get(userId).roles().clientLevel(clientId)
-                .add(Collections.singletonList(userClientRole));
-
-    }
-
-    private void updatePassword(UsersResource usersResource, String userId, String newPassword) {
-
-        CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setTemporary(false);
-        credential.setValue(newPassword);
-
-        usersResource.get(userId).resetPassword(credential);
     }
 
     @Override
@@ -122,33 +66,58 @@ public class KeycloakServiceImpl implements KeycloakService {
         activateUser(email);
     }
 
+    private void updateClientRoles(RealmResource realmResource, String userId, Role role) {
+        String clientId = findClientId(realmResource);
+        clearExistingRoles(realmResource, userId, clientId);
+        assignRole(realmResource, userId, clientId, role.getValue());
+        log.debug("Updated client role for user {}: {}", userId, role.getValue());
+    }
+
+    private String findClientId(RealmResource realmResource) {
+        List<ClientRepresentation> clients = realmResource.clients()
+                .findByClientId(keycloakProperties.getClientId());
+        if (clients.isEmpty()) {
+            throw new IllegalStateException("Client not found: " + keycloakProperties.getClientId());
+        }
+        return clients.get(0).getId();
+    }
+
+    private void clearExistingRoles(RealmResource realmResource, String userId, String clientId) {
+        List<RoleRepresentation> existingRoles = realmResource.users().get(userId)
+                .roles().clientLevel(clientId).listEffective();
+        if (!existingRoles.isEmpty()) {
+            realmResource.users().get(userId).roles()
+                    .clientLevel(clientId).remove(existingRoles);
+        }
+    }
+
+    private void assignRole(RealmResource realmResource, String userId, String clientId, String roleName) {
+        RoleRepresentation userClientRole = realmResource.clients()
+                .get(clientId).roles().get(roleName).toRepresentation();
+        realmResource.users().get(userId).roles()
+                .clientLevel(clientId).add(List.of(userClientRole));
+    }
+
     private void activateUser(String email) {
         UsersResource usersResource = getUserResource();
+        UserRepresentation user = findUserByEmail(usersResource, email);
+        user.setEmailVerified(true);
+        usersResource.get(user.getId()).update(user);
+    }
+
+    private UserRepresentation findUserByEmail(UsersResource usersResource, String email) {
         List<UserRepresentation> users = usersResource.search(null, null, null, email, 0, 1);
         if (users.isEmpty()) {
-            throw new UserNotFoundException("User not found to verify email.");
+            throw new UserNotFoundException("User not found.");
         }
-        UserRepresentation userRepresentation = users.get(0);
-        userRepresentation.setEmailVerified(true);
-        usersResource.get(userRepresentation.getId()).update(userRepresentation);
+        return users.get(0);
     }
-
 
     private UsersResource getUserResource() {
-        Keycloak keycloak = getKeycloakInstance();
-        RealmResource realmResource = keycloak.realm(keycloakProperties.getRealm());
-        return realmResource.users();
-    }
-
-    private void assignClientRole(RealmResource realmResource, String userId, Role role) {
-        ClientRepresentation appClient = realmResource.clients()
-                .findByClientId(keycloakProperties.getClientId()).get(0);
-
-        RoleRepresentation userClientRole = realmResource.clients()
-                .get(appClient.getId()).roles().get(role.getValue()).toRepresentation();
-
-        realmResource.users().get(userId).roles().clientLevel(appClient.getId())
-                .add(Collections.singletonList(userClientRole));
+        try (Keycloak keycloak = getKeycloakInstance()) {
+            RealmResource realmResource = keycloak.realm(keycloakProperties.getRealm());
+            return realmResource.users();
+        }
     }
 
     private UserRepresentation getUserRepresentation(UserDTO dto) {
@@ -172,5 +141,43 @@ public class KeycloakServiceImpl implements KeycloakService {
         return Keycloak.getInstance(keycloakProperties.getAuthServerUrl(),
                 keycloakProperties.getMasterRealm(), keycloakProperties.getMasterUser()
                 , keycloakProperties.getMasterUserPswd(), keycloakProperties.getMasterClient());
+    }
+
+    private Response createUser(RealmResource realm, UserRepresentation userRepresentation) {
+        Response response = realm.users().create(userRepresentation);
+        handleResponse(response);
+        return response;
+    }
+
+    private void handleResponse(Response response) {
+        int status = response.getStatus();
+        if (status == 201) {
+            log.info("User created successfully.");
+        } else if (status == 409) {
+            log.error("User already exists (status 409).");
+            throw new KeycloakUserCreateException("User already exists.");
+        } else {
+            log.error("Unexpected status: {}", status);
+            throw new KeycloakUserCreateException("Failed with status: " + status);
+        }
+    }
+
+    private void updateUserFields(UserRepresentation user, UserDTO dto) {
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+    }
+
+    private void updatePasswordIfNeeded(UsersResource users, String userId, String password) {
+        if (password != null && !password.isEmpty()) {
+            updatePassword(users, userId, password);
+        }
+    }
+
+    private void updatePassword(UsersResource usersResource, String userId, String newPassword) {
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setTemporary(false);
+        credential.setValue(newPassword);
+        usersResource.get(userId).resetPassword(credential);
     }
 }
