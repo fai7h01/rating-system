@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDTO save(UserDTO user) {
-        validateUser(user);
+        validateUserCreate(user);
         var userEntity = userMapper.toEntity(user);
         var savedEntity = userRepository.save(userEntity);
         userManagementFacade.createUser(user);
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> findAllSellers(Sort sort) {
-        return userMapper.toDtoList(userRepository.findAllByRole(Role.SELLER, sort.descending()));
+        return userMapper.toDtoList(userRepository.findAllByRole(Role.SELLER, sort));
     }
 
     @Override
@@ -100,7 +100,7 @@ public class UserServiceImpl implements UserService {
         userManagementFacade.updateUser(userMapper.toDto(foundUser));
     }
 
-    private void validateUser(UserDTO user) {
+    private void validateUserCreate(UserDTO user) {
         if (userRepository.existsByEmailIgnoreCase(user.getEmail())) {
             throw new UserAlreadyExistsException("Email already in use.");
         }

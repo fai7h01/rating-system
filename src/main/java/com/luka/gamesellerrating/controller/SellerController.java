@@ -24,12 +24,12 @@ public class SellerController {
 
     @GetMapping
     public ResponseEntity<ResponseWrapper> findAllSellers(@RequestParam(value = "sort", defaultValue = "overallRating") String sortBy,
-                                                          @RequestParam(value = "dir", defaultValue = "desc") String direction) {
+                                                          @RequestParam(value = "order", defaultValue = "DESC") String order) {
         return ok(ResponseWrapper.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
                 .message("Sellers retrieved successfully")
-                .data(userService.findAllSellers(Sort.by(sortBy)))
+                .data(userService.findAllSellers(Sort.by(Sort.Direction.fromString(order), sortBy)))
                 .build());
     }
 
