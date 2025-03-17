@@ -14,6 +14,8 @@ import com.luka.gamesellerrating.service.helper.RatingStatsUpdater;
 import com.luka.gamesellerrating.service.helper.UserManagementFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,6 +75,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDTO> findAllSellers(Sort sort) {
         return userMapper.toDtoList(userRepository.findAllByRole(Role.SELLER, sort));
+    }
+
+    @Override
+    public List<UserDTO> findTopSellers(int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit);
+        return userMapper.toDtoList(userRepository.findTopSellers(Role.SELLER, pageable));
     }
 
     @Override

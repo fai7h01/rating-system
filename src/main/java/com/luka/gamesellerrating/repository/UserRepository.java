@@ -2,6 +2,7 @@ package com.luka.gamesellerrating.repository;
 
 import com.luka.gamesellerrating.entity.User;
 import com.luka.gamesellerrating.enums.Role;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,6 +19,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAllByUsernameContainingAndRole(@Param("username") String username,
                                                   @Param("role") Role role);
     List<User> findAllByRole(Role role, Sort sort);
+
+    @Query("SELECT u FROM User u WHERE u.role = :role ORDER BY u.overallRating DESC")
+    List<User> findTopSellers(@Param("role") Role role, Pageable pageable);
     boolean existsByEmailIgnoreCase(String email);
     boolean existsByUsernameIgnoreCase(String username);
 }

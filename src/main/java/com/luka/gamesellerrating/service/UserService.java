@@ -15,6 +15,7 @@ public interface UserService {
     UserDTO findByEmail(String email);
     List<UserDTO> findSellersByUsernameContaining(String username);
     List<UserDTO> findAllSellers(Sort sort);
+    List<UserDTO> findTopSellers(int page, int limit);
     void updateStatus(Long id, UserStatus status);
     void verifyEmail(String email, String token);
     void resetPassword(String email, String token, ResetPasswordDTO newPassword);

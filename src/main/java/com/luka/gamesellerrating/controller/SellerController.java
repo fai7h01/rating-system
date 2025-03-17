@@ -42,4 +42,15 @@ public class SellerController {
                 .data(userService.findSellersByUsernameContaining(username))
                 .build());
     }
+
+    @GetMapping("/top")
+    public ResponseEntity<ResponseWrapper> findTopSellers(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                          @RequestParam(value = "limit", defaultValue = "3") int limit) {
+        return ok(ResponseWrapper.builder()
+                .success(true)
+                .code(HttpStatus.OK.value())
+                .message("Top sellers retrieved successfully")
+                .data(userService.findTopSellers(page, limit))
+                .build());
+    }
 }
