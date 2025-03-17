@@ -96,6 +96,7 @@ public class UserServiceImpl implements UserService {
     public void resetPassword(String email, String token, ResetPasswordDTO newPassword) {
         var foundUser = findUserEntityByEmail(email);
         foundUser.setPassword(newPassword.getNewPassword());
+        foundUser.setConfirmPassword(newPassword.getConfirmPassword());
         userManagementFacade.updateUser(userMapper.toDto(foundUser));
     }
 
