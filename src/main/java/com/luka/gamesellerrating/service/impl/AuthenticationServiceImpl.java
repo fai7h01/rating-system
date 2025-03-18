@@ -1,6 +1,7 @@
 package com.luka.gamesellerrating.service.impl;
 
 import com.luka.gamesellerrating.dto.UserDTO;
+import com.luka.gamesellerrating.exception.UserNotFoundException;
 import com.luka.gamesellerrating.service.AuthenticationService;
 import com.luka.gamesellerrating.service.UserService;
 import org.springframework.context.annotation.Lazy;
@@ -31,7 +32,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 return userService.findByEmail(username);
             }
         }
-        throw new IllegalStateException("No authenticated user found");
+        throw new UserNotFoundException("No authenticated user found");
     }
 
     @Override

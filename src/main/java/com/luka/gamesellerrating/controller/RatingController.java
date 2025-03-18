@@ -31,7 +31,7 @@ public class RatingController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseWrapper> getSellerRatings(@PathVariable("sellerId") Long sellerId) {
+    public ResponseEntity<ResponseWrapper> findSellerRatings(@PathVariable("sellerId") Long sellerId) {
         return ok(ResponseWrapper.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
@@ -41,7 +41,7 @@ public class RatingController {
     }
 
     @GetMapping("/{ratingId}")
-    public ResponseEntity<ResponseWrapper> getRating(@PathVariable("sellerId") Long sellerId,
+    public ResponseEntity<ResponseWrapper> findRating(@PathVariable("sellerId") Long sellerId,
                                                      @PathVariable("ratingId") Long ratingId) {
         return ok(ResponseWrapper.builder()
                 .success(true)

@@ -24,7 +24,8 @@ public class RatingServiceImpl implements RatingService {
     private final RatingValidator ratingValidator;
     private final RatingMapper ratingMapper;
 
-    public RatingServiceImpl(RatingRepository ratingRepository, RatingFactory ratingFactory, RatingValidator ratingValidator, RatingMapper ratingMapper) {
+    public RatingServiceImpl(RatingRepository ratingRepository, RatingFactory ratingFactory, RatingValidator ratingValidator,
+                             RatingMapper ratingMapper) {
         this.ratingRepository = ratingRepository;
         this.ratingFactory = ratingFactory;
         this.ratingValidator = ratingValidator;

@@ -1,5 +1,6 @@
 package com.luka.gamesellerrating.controller;
 
+import com.luka.gamesellerrating.annotation.ExecutionTime;
 import com.luka.gamesellerrating.dto.wrapper.ResponseWrapper;
 import com.luka.gamesellerrating.service.UserService;
 import org.springframework.data.domain.Sort;
@@ -43,6 +44,7 @@ public class SellerController {
                 .build());
     }
 
+    @ExecutionTime
     @GetMapping("/top")
     public ResponseEntity<ResponseWrapper> findTopSellers(@RequestParam(value = "page", defaultValue = "0") int page,
                                                           @RequestParam(value = "limit", defaultValue = "3") int limit) {
