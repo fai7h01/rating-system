@@ -1,0 +1,23 @@
+applications:
+  - name: keycloak
+    memory: 1G
+    instances: 1
+    docker:
+      image: quay.io/keycloak/keycloak:22.0.5
+    command: /opt/keycloak/bin/kc.sh start --http-port=$PORT --hostname=keycloak.cfapps.us10-001.hana.ondemand.com --proxy=edge --hostname-strict=false --hostname-strict-backchannel=false
+    routes:
+      - route: keycloak.cfapps.us10-001.hana.ondemand.com
+    services:
+      - postgres-db
+    health-check-type: none
+    env:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-281b72e9-c934-4049-8397-adea48e88a5c.cqryblsdrbcs.us-east-1.rds.amazonaws.com:5644/BVYiEoHAOmfP?sslmode=require
+      KC_DB_USERNAME: eaf8d0726b60
+      KC_DB_PASSWORD: d196b5d51cafb56e989010e35b3
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: true
+      KC_HTTPS_ENABLED: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      QUARKUS_HTTP_PROXY_ADDRESS_FORWARDING: true

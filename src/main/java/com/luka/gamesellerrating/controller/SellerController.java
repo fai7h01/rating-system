@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.springframework.data.domain.Sort.Direction.fromString;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
@@ -30,7 +31,7 @@ public class SellerController {
                 .success(true)
                 .code(HttpStatus.OK.value())
                 .message("Sellers retrieved successfully")
-                .data(userService.findAllSellers(Sort.by(Sort.Direction.fromString(order), sortBy)))
+                .data(userService.findAllSellers(Sort.by(fromString(order), sortBy)))
                 .build());
     }
 

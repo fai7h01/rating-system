@@ -39,7 +39,7 @@ public class LoggingAspect {
 
     private String getUsername(){
         if (authService.isUserAnonymous()) {
-            throw new UserNotFoundException("No User");
+            return "anonymous";
         }
         return authService.getLoggedInUser().getUsername();
     }
