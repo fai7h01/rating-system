@@ -21,3 +21,18 @@ applications:
       KC_HTTPS_ENABLED: false
       KC_HOSTNAME_STRICT_HTTPS: false
       QUARKUS_HTTP_PROXY_ADDRESS_FORWARDING: true
+
+  - name: rating-system
+    random-route: true
+    path: ./target/rating-system-0.0.1-SNAPSHOT.jar
+    memory: 1G
+    buildpacks:
+      - sap_java_buildpack_jakarta
+    services:
+      - postgres-db
+      - redis-cache
+    env:
+      TARGET_RUNTIME: tomcat
+      SPRING_PROFILES_ACTIVE: prod
+      JBP_CONFIG_COMPONENTS: "jres: ['com.sap.xs.java.buildpack.jdk.SAPMachineJDK']"
+      JBP_CONFIG_SAP_MACHINE_JDK: "{ version: 17.+ }"
