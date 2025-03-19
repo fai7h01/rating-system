@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ public class UserServiceImpl implements UserService {
     private final UserManagementFacade userManagementFacade;
     private final UserMapper userMapper;
     private final RatingStatsUpdater ratingStatsUpdater;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<UserDTO> findAll() {
@@ -42,6 +44,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO save(UserDTO user) {
         validateUserCreate(user);
         var userEntity = userMapper.toEntity(user);
+        setEncodedPassword(userEntity);
         var savedEntity = userRepository.save(userEntity);
         userManagementFacade.createUser(user);
         return userMapper.toDto(savedEntity);
@@ -125,5 +128,11 @@ public class UserServiceImpl implements UserService {
     private User findUserEntityByEmail(String email) {
         return userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
+    }
+
+    private void setEncodedPassword(User user) {
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+        user.setConfirmPassword(encodedPassword);
     }
 }
