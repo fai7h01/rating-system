@@ -15,12 +15,18 @@ components:
           authorizationUrl: http://localhost:8080/realms/leverx/protocol/openid-connect/auth
           tokenUrl: http://localhost:8080/realms/leverx/protocol/openid-connect/token
 security:
-  - oauth2: []
+  - oauth2: [ ]
 tags:
   - name: Admin
     description: Admin operations
   - name: Auth
     description: Authentication operations
+  - name: Game Objects
+    description: Game object operations
+  - name: Ratings
+    description: Rating operations
+  - name: Sellers
+    description: Seller operations
 paths:
   /api/v1/admin/users:
     get:
@@ -60,7 +66,7 @@ paths:
   /api/v1/admin/ratings/{id}/status:
     put:
       tags:
-            - Admin
+        - Admin
       summary: Update rating status
       parameters:
         - name: id
@@ -170,3 +176,281 @@ paths:
       responses:
         '204':
           description: Password reset successfully
+
+  /api/v1/game-objects:
+    get:
+      tags:
+        - Game Objects
+      summary: Retrieve all game objects
+      responses:
+        '200':
+          description: List of game objects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                        text:
+                          type: string
+                        seller:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            username:
+                              type: string
+                            email:
+                              type: string
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+    post:
+      tags:
+        - Game Objects
+      summary: Create a new game object
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                text:
+                  type: string
+      responses:
+        '201':
+          description: Game object created successfully
+
+  /api/v1/game-objects/{sellerId}:
+    get:
+      tags:
+        - Game Objects
+      summary: Retrieve all game objects by seller ID
+      parameters:
+        - name: sellerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of game objects for seller
+  /api/v1/game-objects/{id}:
+    put:
+      tags:
+        - Game Objects
+      summary: Update a game object
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                text:
+                  type: string
+      responses:
+        '200':
+          description: Game object updated successfully
+    delete:
+      tags:
+        - Game Objects
+      summary: Delete a game object
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Game object deleted successfully
+
+  /api/v1/sellers/{sellerId}/ratings:
+    post:
+      tags:
+        - Ratings
+      summary: Submit a rating
+      parameters:
+        - name: sellerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: integer
+                comment:
+                  type: string
+      responses:
+        '201':
+          description: Rating submitted successfully
+    get:
+      tags:
+        - Ratings
+      summary: Retrieve all ratings for a seller
+      parameters:
+        - name: sellerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of ratings for seller
+
+  /api/v1/sellers/{sellerId}/ratings/{ratingId}:
+    get:
+      tags:
+        - Ratings
+      summary: Retrieve a specific rating
+      parameters:
+        - name: sellerId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: ratingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Rating details
+    put:
+      tags:
+        - Ratings
+      summary: Update a rating
+      parameters:
+        - name: sellerId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: ratingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: integer
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: Rating updated successfully
+    delete:
+      tags:
+        - Ratings
+      summary: Delete a rating
+      parameters:
+        - name: sellerId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: ratingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Rating deleted successfully
+
+  /api/v1/sellers:
+    get:
+      tags:
+        - Sellers
+      summary: Retrieve all sellers
+      parameters:
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of sellers
+
+  /api/v1/sellers/search:
+    get:
+      tags:
+        - Sellers
+      summary: Search sellers by username
+      parameters:
+        - name: username
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of matching sellers
+
+  /api/v1/sellers/top:
+    get:
+      tags:
+        - Sellers
+      summary: Retrieve top sellers
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of top sellers
