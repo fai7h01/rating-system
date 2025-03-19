@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class EmailServiceImplUnitTest {
+class EmailServiceImplUnitTest {
 
     @Mock
     private JavaMailSender mailSender;
@@ -37,7 +37,7 @@ public class EmailServiceImplUnitTest {
     private EmailServiceImpl emailService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         UserDTO userDTO = new UserDTO();
         userDTO.setFirstName("John");
         userDTO.setLastName("Doe");
@@ -50,7 +50,7 @@ public class EmailServiceImplUnitTest {
     }
 
     @Test
-    public void testSendUserVerificationEmail() {
+    void testSendUserVerificationEmail() {
         String testEmail = "john.doe@example.com";
         emailService.sendUserVerificationEmail("john.doe@example.com");
 
