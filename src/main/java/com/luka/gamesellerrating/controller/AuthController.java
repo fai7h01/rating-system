@@ -49,7 +49,7 @@ public class AuthController {
 
     @PostMapping("/new-password")
     public ResponseEntity<Void> resetUserPassword(@RequestParam("email") String email, @RequestParam("token") String token,
-                                                  @RequestBody ResetPasswordDTO resetPassword) {
+                                                  @Valid @RequestBody ResetPasswordDTO resetPassword) {
         userService.resetPassword(email, token, resetPassword);
         return noContent().build();
     }

@@ -50,5 +50,4 @@ public class RatingValidator {
         var currentUser = authService.getLoggedInUser();
         return rating.getAuthor() != null && rating.getAuthor().getId().equals(currentUser.getId());
     }
-
 }

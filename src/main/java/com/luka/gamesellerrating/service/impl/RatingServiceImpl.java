@@ -92,5 +92,4 @@ public class RatingServiceImpl implements RatingService {
         entity.setValue(dto.getStars());
         entity.getComment().setMessage(dto.getComment().getMessage());
     }
-
 }

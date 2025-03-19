@@ -18,5 +18,4 @@ public class KeycloakClientHelper {
                 keycloakProperties.getMasterRealm(), keycloakProperties.getMasterUser()
                 , keycloakProperties.getMasterUserPswd(), keycloakProperties.getMasterClient());
     }
-
 }

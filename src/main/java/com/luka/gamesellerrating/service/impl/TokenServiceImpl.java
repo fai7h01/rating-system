@@ -34,6 +34,4 @@ public class TokenServiceImpl implements TokenService {
         tokenValidator.validateStoredToken(storedToken, tokenVal);
         tokenCacheManager.removeToken(email, tokenType);
     }
-
-
 }
