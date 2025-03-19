@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.luka.gamesellerrating.enums.RatingStatus;
 import com.luka.gamesellerrating.enums.RatingValue;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
@@ -18,7 +19,9 @@ public class RatingDTO {
 
     @JsonProperty(access = READ_ONLY)
     private Long id;
+    @NotNull
     private RatingValue stars;
+    @NotNull
     private CommentDTO comment;
     @JsonProperty(access = READ_ONLY)
     private UserDTO author;

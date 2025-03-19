@@ -28,7 +28,7 @@ public class GameObjectServiceImpl implements GameObjectService {
         validateNewGameObject(gameObject.getTitle());
         var currentUser = getLoggedInUser();
         gameObject.setSeller(currentUser);
-        var entity =gameObjMapper.toEntity(gameObject);
+        var entity = gameObjMapper.toEntity(gameObject);
         return gameObjMapper.toDto(gameObjectRepository.save(entity));
     }
 
