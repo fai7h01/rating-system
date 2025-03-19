@@ -1,0 +1,172 @@
+openapi: 3.0.3
+info:
+  title: Rating System API
+  description: API documentation for Rating System
+  version: 1.0.0
+servers:
+  - url: http://localhost:9090
+    description: Local server
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: http://localhost:8080/realms/leverx/protocol/openid-connect/auth
+          tokenUrl: http://localhost:8080/realms/leverx/protocol/openid-connect/token
+security:
+  - oauth2: []
+tags:
+  - name: Admin
+    description: Admin operations
+  - name: Auth
+    description: Authentication operations
+paths:
+  /api/v1/admin/users:
+    get:
+      tags:
+        - Admin
+      summary: Retrieve all users
+      responses:
+        '200':
+          description: List of users
+  /api/v1/admin/users/anonymous:
+    get:
+      tags:
+        - Admin
+      summary: Retrieve all anonymous users
+      responses:
+        '200':
+          description: List of anonymous users
+  /api/v1/admin/users/{id}/status:
+    put:
+      tags:
+        - Admin
+      summary: Update user status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Status updated
+  /api/v1/admin/ratings/{id}/status:
+    put:
+      tags:
+            - Admin
+      summary: Update rating status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Status updated
+
+  /api/v1/auth:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                confirmPassword:
+                  type: string
+                role:
+                  type: string
+      responses:
+        '201':
+          description: User registered successfully
+
+  /api/v1/auth/confirmation:
+    post:
+      tags:
+        - Auth
+      summary: Activate user account
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Account activated successfully
+  /api/v1/auth/forgot-password:
+    post:
+      tags:
+        - Auth
+      summary: Send reset password email
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Password reset email sent
+  /api/v1/auth/new-password:
+    post:
+      tags:
+        - Auth
+      summary: Reset user password
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                confirmPassword:
+                  type: string
+      responses:
+        '204':
+          description: Password reset successfully
