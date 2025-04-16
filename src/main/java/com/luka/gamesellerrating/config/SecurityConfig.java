@@ -1,6 +1,5 @@
 package com.luka.gamesellerrating.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,12 +24,15 @@ import static org.springframework.http.HttpMethod.*;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Value("${app.base-url}")
-    private String baseUrl;
+    @Value("${server.port}")
+    private String port;
     private final KeycloakProperties keycloakProperties;
+
+    public SecurityConfig(KeycloakProperties keycloakProperties) {
+        this.keycloakProperties = keycloakProperties;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -47,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(PUT, "/api/v1/game-objects").hasAuthority(SELLER.getValue())
                         .requestMatchers(DELETE, "/api/v1/game-objects/*").hasAuthority(SELLER.getValue())
                         .requestMatchers(
+                                "/actuator/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/api-docs/**",
@@ -78,7 +81,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(baseUrl, keycloakProperties.getAuthServerUrl()));
+        configuration.setAllowedOrigins(List.of("http://locahost:" + port, keycloakProperties.getAuthServerUrl()));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

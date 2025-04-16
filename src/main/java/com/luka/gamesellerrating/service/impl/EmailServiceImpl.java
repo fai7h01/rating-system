@@ -23,8 +23,8 @@ import static com.luka.gamesellerrating.enums.TokenType.VERIFICATION_TOKEN;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    @Value("${app.base-url}")
-    private String baseUrl;
+    @Value("${server.port}")
+    private String port;
     @Value("${spring.mail.username}")
     private String fromEmail;
 
@@ -73,14 +73,14 @@ public class EmailServiceImpl implements EmailService {
 
     private String createVerificationEmailMessage(String email, TokenDTO token) {
         String userFullName = findUserFullName(email);
-        String link = baseUrl + "/api/v1/auth/confirmation?email=" + email + "&token=" + token.getToken();
+        String link = "http://localhost: " + port + "/api/v1/auth/confirmation?email=" + email + "&token=" + token.getToken();
         String tokenExpiryDate = token.getExpiryDate().toString();
         return createVerificationEmailText(userFullName, link, tokenExpiryDate);
     }
 
     private String createResetPasswordEmailMessage(String email, TokenDTO token) {
         String userFullName = findUserFullName(email);
-        String link = baseUrl + "/api/v1/auth/new-password?email=" + email + "&token=" + token.getToken();
+        String link = "http://localhost: " + port + "/api/v1/auth/new-password?email=" + email + "&token=" + token.getToken();
         String tokenExpiryDate = token.getExpiryDate().toString();
         return createResetPasswordEmailText(userFullName, link, tokenExpiryDate);
     }

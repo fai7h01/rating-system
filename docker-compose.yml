@@ -1,39 +1,90 @@
 volumes:
-  postgres_data:
+  postgres-data:
     driver: local
-  redis_data:
+  redis-data:
     driver: local
+
 services:
-  postgres:
-    image: postgres
-    container_name: rating-system-pg
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+  rating-system-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rating-system-service:latest
+    container_name: rating-system-service
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: password
+      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=9tRQF5H2TsNM
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_PASSWORD=your_secure_password
+      - SERVER_PORT=9090
+      - KEYCLOAK_REALM=leverx
+      - KEYCLOAK_AUTH_SERVER_URL=http://keycloak:8080
+      - KEYCLOAK_RESOURCE=rating-system
+      - MASTER_USER_USERNAME=admin
+      - MASTER_USER_PASSWORD=admin
+      - MASTER_REALM=master
+      - MASTER_CLIENT=admin-cli
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics
+    networks:
+      - leverx-network
+    depends_on:
+      - redis
+      - postgres
+      - keycloak
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 9tRQF5H2TsNM
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - leverx-network
   keycloak:
     image: quay.io/keycloak/keycloak:22.0
     container_name: rating-system-kc
     environment:
         KC_DB: postgres
         KC_DB_URL_HOST: postgres
-        KC_DB_URL_DATABASE: keycloak
-        KC_DB_USERNAME: keycloak
-        KC_DB_PASSWORD: password
+        KC_DB_URL_DATABASE: postgres
+        KC_DB_USERNAME: admin
+        KC_DB_PASSWORD: 9tRQF5H2TsNM
         KEYCLOAK_ADMIN: admin
         KEYCLOAK_ADMIN_PASSWORD: admin
+        KEYCLOAK_IMPORT: /opt/keycloak/data/import/realm-export.json
     command: start-dev
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     ports:
-      - 8080:8080
+      - "8080:8080"
     depends_on:
       - postgres
+    networks:
+      - leverx-network
   redis:
-    image: redis:7.2-alpine
-    container_name: rating-system-redis
+    image: redis:latest
+    container_name: redis
     ports:
-      - 6379:6379
+      - "6379:6379"
+    restart: unless-stopped
     volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
+      - redis-data:/data
+    environment:
+      - REDIS_PASSWORD=your_secure_password  # Add a password for Redis
+    command: [ "redis-server", "--requirepass", "your_secure_password" ]
+    networks:
+      - leverx-network
+
+networks:
+  leverx-network:
+    driver: bridge
