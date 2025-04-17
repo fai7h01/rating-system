@@ -26,8 +26,10 @@ import static org.springframework.http.HttpMethod.*;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${server.port}")
+    @Value("${server.port:9090}")
     private String port;
+    @Value("${server.host:http://localhost}")
+    private String host;
     private final KeycloakProperties keycloakProperties;
 
     public SecurityConfig(KeycloakProperties keycloakProperties) {
@@ -81,7 +83,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://locahost:" + port, keycloakProperties.getAuthServerUrl()));
+        configuration.setAllowedOrigins(List.of(host + ":" + port, keycloakProperties.getAuthServerUrl()));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
