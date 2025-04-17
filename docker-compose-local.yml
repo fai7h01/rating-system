@@ -15,8 +15,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=local
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/postgres
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=9tRQF5H2TsNM
+      - SPRING_DATASOURCE_USERNAME=${PG_ADMIN}
+      - SPRING_DATASOURCE_PASSWORD=${PG_PASSWORD}
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_DATA_REDIS_PASSWORD=your_secure_password
@@ -40,8 +40,8 @@ services:
     image: postgres:latest
     container_name: postgres
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: 9tRQF5H2TsNM
+      POSTGRES_USER: ${PG_ADMIN}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
       POSTGRES_DB: postgres
     ports:
       - "5432:5432"
@@ -57,10 +57,10 @@ services:
         KC_DB: postgres
         KC_DB_URL_HOST: postgres
         KC_DB_URL_DATABASE: postgres
-        KC_DB_USERNAME: admin
-        KC_DB_PASSWORD: 9tRQF5H2TsNM
-        KEYCLOAK_ADMIN: admin
-        KEYCLOAK_ADMIN_PASSWORD: admin
+        KC_DB_USERNAME: ${PG_ADMIN}
+        KC_DB_PASSWORD: ${PG_PASSWORD}
+        KEYCLOAK_ADMIN: ${KC_ADMIN}
+        KEYCLOAK_ADMIN_PASSWORD: ${KC_PASSWORD}
         KEYCLOAK_IMPORT: /opt/keycloak/data/import/realm-export.json
     command: start-dev
     volumes:
