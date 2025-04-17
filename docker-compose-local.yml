@@ -21,6 +21,7 @@ services:
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_DATA_REDIS_PASSWORD=your_secure_password
       - SERVER_PORT=9090
+      - SERVER_HOST=http://localhost
       - KEYCLOAK_REALM=leverx
       - KEYCLOAK_AUTH_SERVER_URL=http://keycloak:8080
       - KEYCLOAK_RESOURCE=rating-system
