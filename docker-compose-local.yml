@@ -81,7 +81,7 @@ services:
     volumes:
       - redis-data:/data
     environment:
-      - REDIS_PASSWORD=your_secure_password  # Add a password for Redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD}  # Add a password for Redis
     command: [ "redis-server", "--requirepass", "your_secure_password" ]
     networks:
       - leverx-network
